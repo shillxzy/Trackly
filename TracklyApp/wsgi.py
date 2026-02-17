@@ -11,6 +11,11 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', "TracklyApp.settings")
+# для dev
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "TracklyApp.settings.development")
+
+# для prod
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "TracklyApp.settings.production")
+
 
 application = get_wsgi_application()
