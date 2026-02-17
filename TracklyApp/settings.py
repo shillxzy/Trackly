@@ -21,7 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q*lgcky@4=7i30(g7r!+cy4jw-_3xo_)7bjeo)hizf41egj6d_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'TracklyApp.apps.habits',
-    'drf_spectacular'
+    'drf_spectacular',
+    'TracklyApp.apps.users',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'TracklyApp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
+# DEBUG = config('DEBUG', default=False, cast=bool)
 
 DATABASES = {
     'default': {
@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Trackly API",
-    "DESCRIPTION": "API для трекінгу звичок та Pomodoro-сесій",
+    "DESCRIPTION": "API for tracking habits and Pomodoro sessions",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
