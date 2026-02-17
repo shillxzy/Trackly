@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class HabitsConfig(AppConfig):
-    name = 'apps.habits'
+    name = 'TracklyApp.apps.habits'
