@@ -1,37 +1,65 @@
 import React, { useState } from "react";
 import "../styles/LoginPage.css";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { loginUser } from "../services/auth";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ identifier: "", password: "" });
+  const [error, setError] = useState(null);
   const [remember, setRemember] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login submitted");
-  };
+ const handleChange = (e) => {
+  setForm({ ...form, [e.target.name]: e.target.value });
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
+  try {
+    await loginUser(form); 
+    alert("Успішний вхід!");
+    navigate("/");
+  } catch (err) {
+    setError(err.message);
+  }
+};
 
   return (
     <div className="login-container">
       <div className="login-card">
         <h1>Log in</h1>
         <p className="subtitle">
-          Log in using your username and password.
+          Log in using your email and password.
         </p>
 
+        {error && <p className="input-error">{error}</p>}
+
         <form onSubmit={handleSubmit}>
-          <label>Email</label>
+          <label>Email or Username</label>
           <div className="input-group">
             <FaEnvelope className="icon" />
-            <input type="email" placeholder="email@example.com" required />
+            <input
+              name="identifier"          
+              type="text"                
+              placeholder="Email or Username"
+              value={form.identifier}   
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <label>Password</label>
           <div className="input-group">
             <FaLock className="icon" />
             <input
+              name="password"
               type={showPassword ? "text" : "password"}
               placeholder="************"
+              value={form.password}
+              onChange={handleChange}
               required
             />
             <span
@@ -42,7 +70,7 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <a href="#" className="forgot">
+          <a href="/refresh-password" className="forgot">
             Forgot your password?
           </a>
 
@@ -66,7 +94,7 @@ export default function LoginPage() {
           </button>
 
           <p className="signup">
-            Don't have an account? <a href="#">Sign up</a>
+            Don't have an account? <Link to="/register">Sign up</Link>
           </p>
         </form>
       </div>
