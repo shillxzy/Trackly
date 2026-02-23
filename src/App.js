@@ -1,14 +1,69 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import HomePage from "./pages/HomePage";
+import Loading from "./components/Loading";
+
+function PageWrapper({ children }) {
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
+  return (
+    <>
+      {loading && <Loading />}
+      {children}
+    </>
+  );
+}
 
 function App() {
+  const [isAuth, setIsAuth] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    setIsAuth(!!token);
+  }, []);
+
+  if (isAuth === null) return <Loading />; 
+
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Routes>
+      <PageWrapper>
+        <Routes>
+
+          <Route
+            path="/"
+            element={isAuth ? <Navigate to="/home" /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/login"
+            element={isAuth ? <Navigate to="/home" /> : <LoginPage />}
+          />
+
+          <Route
+            path="/register"
+            element={isAuth ? <Navigate to="/home" /> : <RegisterPage />}
+          />
+
+          <Route
+            path="/home"
+            element={isAuth ? <HomePage /> : <Navigate to="/login" />}
+          />
+        </Routes>
+      </PageWrapper>
     </Router>
   );
 }
