@@ -22,15 +22,31 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
+    username = serializers.CharField(source='user.username', required=False)
+    email = serializers.EmailField(source="user.email", required=False)
+    fullname = serializers.CharField(required=False)
+    avatar = serializers.ImageField(required=False)
     avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ("username", "fullname", "avatar_url", "theme", "timezone", "streak_days")
+        fields = ("username", "email", "fullname", "avatar", "avatar_url", "theme", "timezone", "streak_days")
 
     def get_avatar_url(self, obj):
         request = self.context.get("request")
         if obj.avatar:
             return request.build_absolute_uri(obj.avatar.url)
         return None
+
+    def update(self, instance, validated_data):
+
+        user_data = validated_data.pop('user', {})
+        for attr, value in user_data.items():
+            setattr(instance.user, attr, value)
+        instance.user.save()
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
