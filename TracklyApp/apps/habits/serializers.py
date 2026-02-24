@@ -13,14 +13,19 @@ class HabitCompletionSerializer(serializers.ModelSerializer):
         fields = ("id", "habit", "completed_at")
 
     def validate(self, attrs):
-        habit = attrs.get('habit')
-        date = attrs.get('date')
+        habit = attrs.get("habit")
+        completed_at = attrs.get("completed_at")
 
-        if HabitCompletion.objects.filter(habit=habit, date=date).exists():
+        if HabitCompletion.objects.filter(
+            habit=habit,
+            completed_at=completed_at
+        ).exists():
             raise serializers.ValidationError(
-            {"date": "Habit completion for this date already exists."}
+                {"completed_at": "Habit completion for this date already exists."}
             )
+
         return attrs
+
 
 
 class HabitScheduleSerializer(serializers.ModelSerializer):

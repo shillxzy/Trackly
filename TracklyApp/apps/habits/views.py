@@ -5,10 +5,6 @@ from .serializers import HabitSerializer, HabitScheduleSerializer, HabitCompleti
 
 
 class BaseUserModelViewSet(ModelViewSet):
-    """
-    Базовий ViewSet для моделей, які належать користувачу.
-    Реалізує get_queryset, perform_create і perform_destroy.
-    """
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -36,6 +32,16 @@ class HabitScheduleView(BaseUserModelViewSet):
 class HabitCompletionView(BaseUserModelViewSet):
     queryset = HabitCompletion.objects.all()
     serializer_class = HabitCompletionSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+
+        if user.is_superuser:
+            return queryset.all()
+
+        return queryset.filter(habit__user=user)
+
 
 class FocusSessionView(BaseUserModelViewSet):
     queryset = FocusSession.objects.all()
