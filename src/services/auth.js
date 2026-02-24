@@ -20,34 +20,36 @@ async function refreshAccessToken() {
 export async function request(url, options = {}) {
   let token = localStorage.getItem("access_token");
 
+  let resHeaders = { ...options.headers };
 
-  let headers = {
-  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  ...options.headers,
-};
+  if (token) {
+    resHeaders.Authorization = `Bearer ${token}`;
+  }
 
-if (!(options.body instanceof FormData)) {
-  headers["Content-Type"] = "application/json";
-}
+  // лише додати Content-Type якщо не FormData
+  if (!(options.body instanceof FormData)) {
+    resHeaders["Content-Type"] = "application/json";
+  }
 
-let res = await fetch(API_URL + url, {
-  ...options,
-  headers,
-});
-
-
+  let res = await fetch(API_URL + url, {
+    ...options,
+    headers: resHeaders,
+  });
 
   if (res.status === 401) {
     try {
       token = await refreshAccessToken();
 
+      // повторний запит
+      let retryHeaders = { ...options.headers, Authorization: `Bearer ${token}` };
+
+      if (!(options.body instanceof FormData)) {
+        retryHeaders["Content-Type"] = "application/json";
+      }
+
       res = await fetch(API_URL + url, {
         ...options,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          ...options.headers,
-        },
+        headers: retryHeaders,
       });
     } catch {
       localStorage.removeItem("access_token");
@@ -56,8 +58,7 @@ let res = await fetch(API_URL + url, {
     }
   }
 
-  const text = await res.text(); 
-
+  const text = await res.text();
   let data;
   try {
     data = text ? JSON.parse(text) : null;
@@ -71,6 +72,7 @@ let res = await fetch(API_URL + url, {
 
   return data;
 }
+
 
 
 export async function loginUser({ identifier, password }) {

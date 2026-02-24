@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-import { getProfile, updateProfile } from "../services/users";
+import { getProfile, patchProfile } from "../services/users";
 import Avatar from "../components/Avatar";
 import HomeLogo from "../components/HomeLogo.png";
 
@@ -20,7 +20,7 @@ export default function ProfilePage({ setIsAuth }) {
 
   const [formData, setFormData] = useState({
     username: "",
-    full_name: "",
+    fullname: "",
     email: "",
   });
 
@@ -46,7 +46,7 @@ export default function ProfilePage({ setIsAuth }) {
       setUser(profile);
       setFormData({
         username: profile.username || "",
-        full_name: profile.full_name || "",
+        fullname: profile.fullname || "",
         email: profile.email || "",
       });
     } catch (e) {
@@ -65,11 +65,11 @@ export default function ProfilePage({ setIsAuth }) {
   try {
     const data = new FormData();
 data.append("username", formData.username);
-data.append("full_name", formData.full_name);
+data.append("fullname", formData.fullname);
 data.append("email", formData.email);
 if (formData.avatar) data.append("avatar", formData.avatar);
 
-const updatedProfile = await updateProfile(data); 
+const updatedProfile = await patchProfile(data); 
 setUser(updatedProfile);
     alert("Профіль оновлено!");
   } catch (err) {
@@ -194,7 +194,7 @@ setUser(updatedProfile);
               </div>
               <div>
                 <label>Full Name</label>
-                <input className="profile-input" value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} />
+                <input className="profile-input" value={formData.fullname} onChange={e => setFormData({...formData, fullname: e.target.value})} />
               </div>
               <div>
                 <label>Email</label>

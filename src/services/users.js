@@ -9,4 +9,5 @@ export const updateProfile = (data) =>
 
 // PATCH /api/users/me/profile/
 export const patchProfile = (data) =>
-  request("/users/me/profile/", { method: "PATCH", body: JSON.stringify(data) });
+  request("/users/me/profile/", { method: "PATCH", body: data });
+
