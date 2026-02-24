@@ -1,18 +1,40 @@
-import { request } from "./auth";
+import { refreshToken } from "./auth";
 
-export const refreshToken = async () => {
-  const refresh = localStorage.getItem("refresh_token");
-  if (!refresh) throw new Error("Refresh token not found");
+const API_URL = "http://127.0.0.1:8000/api";
 
-  const res = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh }),
+export async function request(url, options = {}) {
+  let token = localStorage.getItem("access_token");
+
+  let res = await fetch(API_URL + url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
   });
 
-  if (!res.ok) throw new Error("Failed to refresh token");
 
-  const data = await res.json();
-  localStorage.setItem("access_token", data.access);
-  return data.access;
-};
+  if (res.status === 401) {
+    try {
+      token = await refreshToken(); 
+      res = await fetch(API_URL + url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+    } catch (e) {
+      throw new Error("Token expired, please login again");
+    }
+  }
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error);
+  }
+
+  return res.json();
+}

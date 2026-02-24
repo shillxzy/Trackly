@@ -4,12 +4,13 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../services/auth";
 import { useNavigate, Link } from "react-router-dom";
 
-export default function LoginPage() {
+export default function LoginPage({ setIsAuth }) {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [error, setError] = useState(null);
   const [remember, setRemember] = useState(false);
   const navigate = useNavigate();
+
 
  const handleChange = (e) => {
   setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,6 +22,7 @@ const handleSubmit = async (e) => {
   try {
     await loginUser(form); 
     alert("Успішний вхід!");
+    setIsAuth(true);
     navigate("/");
   } catch (err) {
     setError(err.message);

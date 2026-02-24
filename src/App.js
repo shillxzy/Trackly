@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import Loading from "./components/Loading";
+import ProfilePage from "./pages/ProfilePage";
 
 function PageWrapper({ children }) {
   const location = useLocation();
@@ -50,7 +51,7 @@ function App() {
 
           <Route
             path="/login"
-            element={isAuth ? <Navigate to="/home" /> : <LoginPage />}
+            element={isAuth ? <Navigate to="/home" /> : <LoginPage setIsAuth={setIsAuth} />}
           />
 
           <Route
@@ -60,7 +61,12 @@ function App() {
 
           <Route
             path="/home"
-            element={isAuth ? <HomePage /> : <Navigate to="/login" />}
+            element={isAuth ? <HomePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/profile"
+            element={isAuth ? <ProfilePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
           />
         </Routes>
       </PageWrapper>

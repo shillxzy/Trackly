@@ -13,7 +13,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url("../components/auth_background.png") no-repeat center center;
+  background: linear-gradient(180deg, #213B75 0%, #3D6FDB 100%) no-repeat center center;
   background-size: cover;
 }
 
