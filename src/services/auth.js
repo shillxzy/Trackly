@@ -1,7 +1,11 @@
 const API_URL = "http://127.0.0.1:8000/api";
 
+function getToken(key) {
+  return localStorage.getItem(key) || sessionStorage.getItem(key);
+}
+
 async function refreshAccessToken() {
-  const refresh = localStorage.getItem("refresh_token");
+  const refresh = getToken("refresh_token");
   if (!refresh) throw new Error("No refresh token");
 
   const res = await fetch(API_URL + "/token/refresh/", {
@@ -13,12 +17,20 @@ async function refreshAccessToken() {
   if (!res.ok) throw new Error("Refresh token expired");
 
   const data = await res.json();
-  localStorage.setItem("access_token", data.access);
+
+  // оновлюємо там же, де лежав refresh
+  const storage = localStorage.getItem("refresh_token")
+    ? localStorage
+    : sessionStorage;
+
+  storage.setItem("access_token", data.access);
+
   return data.access;
 }
 
+
 export async function request(url, options = {}) {
-  let token = localStorage.getItem("access_token");
+  let token = getToken("access_token");
 
   let resHeaders = { ...options.headers };
 
@@ -26,7 +38,6 @@ export async function request(url, options = {}) {
     resHeaders.Authorization = `Bearer ${token}`;
   }
 
-  // лише додати Content-Type якщо не FormData
   if (!(options.body instanceof FormData)) {
     resHeaders["Content-Type"] = "application/json";
   }
@@ -40,7 +51,6 @@ export async function request(url, options = {}) {
     try {
       token = await refreshAccessToken();
 
-      // повторний запит
       let retryHeaders = { ...options.headers, Authorization: `Bearer ${token}` };
 
       if (!(options.body instanceof FormData)) {
@@ -75,7 +85,7 @@ export async function request(url, options = {}) {
 
 
 
-export async function loginUser({ identifier, password }) {
+export async function loginUser({ identifier, password }, remember) {
   const res = await fetch(API_URL + "/token/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -98,8 +108,18 @@ export async function loginUser({ identifier, password }) {
     throw new Error(data?.detail || "Incorrect login or password");
   }
 
-  localStorage.setItem("access_token", data.access);
-  localStorage.setItem("refresh_token", data.refresh);
+  const storage = remember ? localStorage : sessionStorage;
+  
+  storage.setItem("access_token", data.access);
+  storage.setItem("refresh_token", data.refresh);
+
+  if (remember) {
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+  } else {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  }
 
   return data;
 }

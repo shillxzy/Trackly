@@ -20,7 +20,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setError(null);
   try {
-    await loginUser(form); 
+    await loginUser(form, remember); 
     alert("Успішний вхід!");
     setIsAuth(true);
     navigate("/");
@@ -81,11 +81,14 @@ const handleSubmit = async (e) => {
           </button>
 
           <div className="remember">
+            <label className="switch">
             <input
               type="checkbox"
               checked={remember}
               onChange={() => setRemember(!remember)}
             />
+            <span className="slider"></span>
+            </label>
             <span>Remember me</span>
           </div>
 
