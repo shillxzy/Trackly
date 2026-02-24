@@ -10,7 +10,7 @@ body, html {
     display: flex;
     height: 100vh;
     width: 100vw;
-    background: #f4f6fa;
+    background: linear-gradient( to bottom,#FFFFFF 0%,#D9D9D9 50%,#FFFFFF 100%);
     font-family: 'Hammersmith One', sans-serif;
 }
 
@@ -327,6 +327,20 @@ p {
   flex-wrap: wrap;
 }
 
+.info-section {
+    position: relative;
+}
+
+.info-section input {
+  width: 100%;
+  padding: 14px 40px 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #C2C2C2;
+  font-size: 16px;
+  font-weight: 700;
+  background-color: #F6F6F9;
+}
+
 .avatar-section {
   flex: 0 0 140px;
   display: flex;
@@ -382,11 +396,12 @@ p {
 }
 
 .password-field input {
-  width: 100%;
+  width: 40%;
   padding: 14px 40px 14px 16px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #C2C2C2;
   font-size: 16px;
+  background-color: #F6F6F9;
 }
 
 .toggle-password {
@@ -399,17 +414,6 @@ p {
   color: #445475;
 }
 
-.change-password-btn {
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: none;
-  background-color: #4f46e5;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  align-self: flex-start;
-}
-
 @media (max-width: 768px) {
   .profile-card {
     flex-direction: column;
@@ -420,4 +424,22 @@ p {
     width: 100%;
     flex: unset;
   }
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.complete-profile {
+    width: 388px;
+    height: 58px;
+    background: #2E66B0;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
 }

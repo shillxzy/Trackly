@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import { getProfile, patchProfile } from "../services/users";
 import Avatar from "../components/Avatar";
@@ -24,17 +23,56 @@ export default function ProfilePage({ setIsAuth }) {
     email: "",
   });
 
-  const [passwordData, setPasswordData] = useState({
-    current_password: "",
-    new_password: "",
-    confirm_password: "",
-  });
+ const [passwordData, setPasswordData] = useState({
+  current_password: "",
+  new_password: "",
+  confirm_password: "",
+});
 
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
+const [loadingPassword, setLoadingPassword] = useState(false);
+
+const handleChangePassword = async () => {
+  if (passwordData.new_password !== passwordData.confirm_password) {
+    alert("Новий пароль і підтвердження не збігаються");
+    return;
+  }
+
+  try {
+    setLoadingPassword(true);
+
+    const token = localStorage.getItem("access_token"); 
+    const response = await fetch("http://localhost:8000/api/users/change-password/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Пароль змінено успішно");
+      setPasswordData({
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+    } else {
+      alert(data.detail || "Щось пішло не так");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Помилка мережі");
+  } finally {
+    setLoadingPassword(false);
+  }
+};
+
 
   useEffect(() => {
     loadProfile();
@@ -184,9 +222,6 @@ setUser(updatedProfile);
     Upload New Photo
   </button>
 </div>
-  
-
-
             <div className="info-section">
               <div>
                 <label>Username</label>
@@ -204,38 +239,48 @@ setUser(updatedProfile);
           </div>
 
           {/* PASSWORD SECTION */}
-          <div className="password-section">
-            <h2>Change Password</h2>
+         <div className="password-section">
+  <h2>Change Password</h2>
 
-            <div className="password-field">
-              <label>Current Password</label>
-              <input type={showPassword.current ? "text" : "password"} value={passwordData.current_password} onChange={e => setPasswordData({...passwordData, current_password: e.target.value})} />
-              <span className="toggle-password" onClick={() => setShowPassword({...showPassword, current: !showPassword.current})}>
-                {showPassword.current ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
+  <div className="password-field">
+    <label>Current Password</label>
+    <input
+      type="text"
+      value={passwordData.current_password}
+      onChange={e => setPasswordData({ ...passwordData, current_password: e.target.value })}
+    />
+  </div>
 
-            <div className="password-field">
-              <label>New Password</label>
-              <input type={showPassword.new ? "text" : "password"} value={passwordData.new_password} onChange={e => setPasswordData({...passwordData, new_password: e.target.value})} />
-              <span className="toggle-password" onClick={() => setShowPassword({...showPassword, new: !showPassword.new})}>
-                {showPassword.new ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
+  <div className="password-field">
+    <label>New Password</label>
+    <input
+      type="text"
+      value={passwordData.new_password}
+      onChange={e => setPasswordData({ ...passwordData, new_password: e.target.value })}
+    />
+  </div>
 
-            <div className="password-field">
-              <label>Confirm Password</label>
-              <input type={showPassword.confirm ? "text" : "password"} value={passwordData.confirm_password} onChange={e => setPasswordData({...passwordData, confirm_password: e.target.value})} />
-              <span className="toggle-password" onClick={() => setShowPassword({...showPassword, confirm: !showPassword.confirm})}>
-                {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-
-            <button className="change-password-btn">Change Password</button>
-          </div>
+  <div className="password-field">
+    <label>Confirm Password</label>
+    <input
+      type="text"
+      value={passwordData.confirm_password}
+      onChange={e => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+    />
+  </div>
+</div>
 
           {/* SAVE BUTTON */}
-          <button className="complete-btn" style={{width: "200px"}} onClick={handleProfileSave}>Save Changes</button>
+          <div className="profile-actions">
+          <button className="complete-profile" 
+          
+          onClick={async () => {
+            await handleChangePassword();
+            handleProfileSave();
+          }}
+          disabled={loadingPassword}
+          >Save Changes</button>
+          </div>
         </div>
       </main>
     </div>
