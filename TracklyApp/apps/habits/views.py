@@ -12,10 +12,20 @@ class BaseUserModelViewSet(ModelViewSet):
         queryset = self.queryset
         if user.is_superuser:
             return queryset.all()
+        if self.queryset.model.__name__ == "HabitSchedule":
+            return queryset.filter(habit__user=user)
         return queryset.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        if serializer.Meta.model.__name__ == "HabitSchedule":
+            habit = serializer.validated_data.get("habit")
+            if habit.user != self.request.user:
+                raise PermissionError("Cannot create schedule for another user's habit")
+            serializer.save()
+        elif serializer.Meta.model.__name__ == "HabitCompletion":
+            serializer.save()
+        else:
+            serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
         instance.delete()
