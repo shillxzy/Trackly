@@ -202,7 +202,16 @@ setUser(updatedProfile);
               </div>
             )}
           </div>
+          
         </div>
+
+
+        <div style={{ display: "flex", justifyContent: "flex-start", margin: "5px 0 40px 0" }}>
+    <button className="exit-btn" onClick={() => {
+      const lastPath = sessionStorage.getItem("lastPath") || "/home";
+      navigate(lastPath);
+    }}>⬅ Exit</button>
+  </div>
 
         <div className="profile-content-container">
           <div className="profile-card">

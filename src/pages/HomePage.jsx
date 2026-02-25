@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
+import "../styles/HabitPage.css";
 
 import { getHabits } from "../services/habits";
 import { getHabitCompletions } from "../services/habitCompletions";
@@ -144,7 +145,23 @@ export default function HomePage({ setIsAuth }) {
 
   <div className="tasks-section">
     <h2>Today’s Tasks</h2>
-    <div className="add-habit">+ Add New Habit</div>
+    {habits.length === 0 && (
+    <p>No habits yet</p>
+  )}
+
+  {habits.slice(0, 3).map((habit) => (
+  <div key={habit.id} className="habit-card">
+    <div className="habit-info">
+      <div className="habit-title">{habit.name}</div>
+      <div className="habit-desc">{habit.description}</div>
+    </div>
+    <div className="habit-actions">
+      <button className="habit-done-btn">Mark as done</button>
+    </div>
+  </div>
+))}
+
+    <div className="add-habit" onClick={() => navigate("/habits/create")}>+ Add New Habit</div>
   </div>
 
   <div className="focus-section">

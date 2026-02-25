@@ -6,25 +6,28 @@ import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import Loading from "./components/Loading";
 import ProfilePage from "./pages/ProfilePage";
+import HabitPage from "./pages/HabitPage";
+import HabitCreatePage from "./pages/HabitCreatePage";
 
 function PageWrapper({ children }) {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    if (location.pathname !== "/profile") {
+      sessionStorage.setItem("lastPath", location.pathname);
+    }
 
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 600);
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 600);
 
     return () => clearTimeout(timer);
   }, [location]);
 
   return (
     <>
-      {loading && <Loading />}
       {children}
+      {loading && <Loading />} 
     </>
   );
 }
@@ -68,6 +71,17 @@ function App() {
             path="/profile"
             element={isAuth ? <ProfilePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
           />
+
+          <Route
+            path="/habits"
+            element={isAuth ? <HabitPage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/habits/create"
+            element={isAuth ? <HabitCreatePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
+          />
+
         </Routes>
       </PageWrapper>
     </Router>
