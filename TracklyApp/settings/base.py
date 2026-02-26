@@ -97,6 +97,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
+AUTHENTICATION_BACKENDS = [
+    'TracklyApp.apps.users.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 CORS_ALLOW_ALL_ORIGINS = True
 SECURE_SSL_REDIRECT = False
 CSRF_COOKIE_SECURE = False
