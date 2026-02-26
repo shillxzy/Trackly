@@ -250,41 +250,6 @@ p {
     font-weight: bold;
 }
 
-/* ========================= FOCUS SECTION ========================= */
-.focus-section {
-    grid-column: span 1;
-    background: linear-gradient(180deg, #FD9632, #EF5722);
-    color: white;
-    padding: 25px;
-    border-radius: 20px;
-    text-align: center;
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.focus-section h2 {
-    color: white;
-}
-
-.timer {
-    font-size: 56px;
-    font-weight: bold;
-    margin: 20px 0;
-}
-
-.focus-btn {
-    background: white;
-    color: #EF5722;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-}
-
 /* ========================= CHARTS & CARDS ========================= */
 .chart-wrapper {
     background: #fff;

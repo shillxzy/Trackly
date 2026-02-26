@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
 import "../styles/HabitPage.css";
+import "../styles/FocusSession.css"
 
 import { getHabits, deleteHabit } from "../services/habits";
 import { getHabitCompletions, createHabitCompletion } from "../services/habitCompletions";
@@ -196,10 +197,10 @@ const todayHabits = habits.filter(
                     </button>
                     {habitMenuOpen === habit.id && (
                       <div className="habit-dropdown-menu">
-                        <button onClick={() => navigate(`/habit/${habit.name}/about`)}>
+                        <button onClick={() => navigate(`/habits/about/${habit.id}`)}>
                           About
                         </button>
-                        <button onClick={() => navigate(`/habit/${habit.name}/edit`)}>
+                        <button onClick={() => navigate(`/habits/edit/${habit.id}`)}>
                           Edit
                         </button>
                         <button onClick={() => handleDelete(habit.id)}>Delete</button>

@@ -1,0 +1,111 @@
+/* ========================= HABIT ABOUT PAGE ========================= */
+
+.habit-about-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 32px;
+  width: 70%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  animation: fadeIn 0.25s ease-in-out;
+  border: 1px solid #eef1f7;
+}
+
+.habit-about-card h2 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: #1c345a;
+}
+
+/* ========================= ROWS ========================= */
+
+.habit-about-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #e6ebf2;
+}
+
+.habit-about-row:last-child {
+  border-bottom: none;
+}
+
+.habit-about-row .label {
+  color: #445475;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.habit-about-row .value {
+  color: #1c345a;
+  max-width: 60%;
+  text-align: right;
+  word-break: break-word;
+  font-weight: 600;
+}
+
+/* ========================= STATUS ========================= */
+
+.habit-about-row .value.active {
+  color: #2e7d32;
+}
+
+.habit-about-row .value.inactive {
+  color: #c62828;
+}
+
+/* ========================= ACTIONS ========================= */
+
+.habit-about-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.back-btn,
+.edit-btn {
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  transition: 0.15s ease;
+}
+
+/* Back */
+.back-btn {
+  background: transparent;
+  border: 2px solid #3f6edc;
+  color: #3f6edc;
+}
+
+.back-btn:hover {
+  background: rgba(63, 110, 220, 0.08);
+}
+
+/* Edit */
+.edit-btn {
+  background: linear-gradient(#377BD5 0%, #1D406F 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(63, 110, 220, 0.25);
+}
+
+.edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(63, 110, 220, 0.35);
+}
+
+/* ========================= ANIMATION ========================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,162 @@
+/* ========================= HABIT EDIT PAGE ========================= */
+
+.habit-edit-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 32px;
+  width: 70%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eef1f7;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+/* ========================= FORM ========================= */
+
+.habit-edit-card .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 22px;
+}
+
+.habit-edit-card label {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #445475;
+}
+
+.habit-edit-card input,
+.habit-edit-card textarea {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #dce3f0;
+  font-size: 14px;
+  outline: none;
+  transition: 0.15s ease;
+  background: #f9fbff;
+  color: #1c345a;
+}
+
+.habit-edit-card textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.habit-edit-card input:focus,
+.habit-edit-card textarea:focus {
+  border-color: #3f6edc;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(63, 110, 220, 0.12);
+}
+
+/* ========================= CALENDAR ========================= */
+
+.habit-edit-card .react-calendar {
+  border-radius: 14px;
+  border: 1px solid #e3e9f4;
+  overflow: hidden;
+  padding: 8px;
+  background: #ffffff;
+  font-family: inherit;
+}
+
+.habit-edit-card .react-calendar__tile--now {
+  background: rgba(63, 110, 220, 0.15) !important;
+  border-radius: 8px;
+}
+
+.calendar-day-active-range {
+  background: rgba(63, 110, 220, 0.25) !important;
+  border-radius: 8px;
+}
+
+.habit-edit-card .react-calendar__tile--active {
+  background: #3f6edc !important;
+  color: white;
+  border-radius: 8px;
+}
+
+.calendar-hint {
+  font-size: 13px;
+  color: #6a7aa1;
+  margin-top: 6px;
+}
+
+/* ========================= ERRORS ========================= */
+
+.form-error {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* ========================= ACTIONS ========================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 2px solid #3f6edc;
+  color: #3f6edc;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(63, 110, 220, 0.08);
+}
+
+.save-btn {
+  background: linear-gradient(#377bd5 0%, #1d406f 100%);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+  box-shadow: 0 6px 16px rgba(63, 110, 220, 0.25);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(63, 110, 220, 0.35);
+}
+
+/* ========================= ANIMATION ========================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================= RESPONSIVE ========================= */
+
+@media (max-width: 900px) {
+  .habit-edit-card {
+    width: 100%;
+    padding: 20px;
+  }
+}

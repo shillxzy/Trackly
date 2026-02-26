@@ -1,0 +1,101 @@
+/* ========================= FOCUS SECTION ========================= */
+.focus-section {
+    grid-column: span 1;
+    background: linear-gradient(180deg, #FD9632, #EF5722);
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.focus-section h2 {
+    color: white;
+}
+
+.timer {
+    font-size: 56px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.focus-btn {
+    background: white;
+    color: #EF5722;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+}
+
+.full {
+  width: 100vw;
+  height: 100vh;
+}
+
+.focus-content-wrapper {
+  flex: 1; /* Займає весь вільний простір під topbar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Помаранчева картка */
+.focus-card {
+  background-color: #f37c34; 
+  width: 450px;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.focus-card-header h2 {
+  font-size: 32px;
+  color: white;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 15px;
+}
+
+.timer-display {
+  font-size: 96px; 
+  font-weight: bold;
+  margin: 40px 0;
+}
+
+/* Біла кнопка всередині картки */
+.start-btn {
+  background-color: white;
+  color: #f37c34;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.2s;
+}
+
+.start-btn:hover {
+  transform: scale(1.02);
+}
+
+.history-btn {
+  margin-top: 30px;
+  background-color: #3b76c1;
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
