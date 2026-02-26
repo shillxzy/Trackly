@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
 import "../styles/HabitPage.css";
+import "../styles/Analytics.css"
 
 import { getProfile } from "../services/users";
+import { getHabits } from "../services/habits";
+import { getHabitCompletions } from "../services/habitCompletions";
 
-import HomeLogo from "../components/HomeLogo.png";
+
+import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
@@ -14,11 +18,17 @@ import focussession_icon from "../assets/focussession_icon.png";
 import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
 
+import HabitsCompletedChart from "../components/charts/HabitsCompletedChart";
+import WeeklyProgressChart from "../components/charts/WeeklyProgressChart"; 
+import FocusTimeChart from "../components/charts/FocusTimeChart";
+
 export default function AnalyticsPage({ setIsAuth })
 {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [habits, setHabits] = useState([]);
+  const [completions, setCompletions] = useState([]);
 
 
   useEffect(() => {
@@ -28,9 +38,12 @@ export default function AnalyticsPage({ setIsAuth })
   const loadData = async () => {
     try {
       const profile = await getProfile();
-
+      const habitsData = await getHabits();
+      const completionsData = await getHabitCompletions();
 
       setUser(profile);
+      setHabits(habitsData);
+      setCompletions(completionsData);
     } catch (e) {
       console.error(e);
     }
@@ -109,6 +122,20 @@ export default function AnalyticsPage({ setIsAuth })
                   )}
                 </div>
               </div>
+
+              <div className="charts-row">
+              <div className="weekly-section">
+                  <WeeklyProgressChart completions={completions} />
+                </div>
+              
+                <div className="wide">
+                  <HabitsCompletedChart habits={habits} completions={completions} />
+                </div>
+              
+                <div className="wide">
+                  <FocusTimeChart focusSessions={[]} />
+                </div>
+                </div>
               </main>
 
     </div>

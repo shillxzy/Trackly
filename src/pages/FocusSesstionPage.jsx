@@ -6,7 +6,7 @@ import "../styles/HabitPage.css";
 
 import { getProfile } from "../services/users";
 
-import HomeLogo from "../components/HomeLogo.png";
+import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
 
 import dashboard_icon from "../assets/dashboard_icon.png";

@@ -5,10 +5,12 @@ import "../styles/HabitPage.css";
 
 import { getHabits } from "../services/habits";
 import { getHabitCompletions } from "../services/habitCompletions";
+import { createHabitCompletion } from "../services/habitCompletions";
 import { getProfile } from "../services/users";
 import { createFocusSession } from "../services/focusSessions";
 
-import HomeLogo from "../components/HomeLogo.png";
+
+import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
@@ -76,6 +78,38 @@ export default function HomePage({ setIsAuth }) {
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   };
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const todayHabits = habits.filter(
+  (habit) =>
+    !completions.some(
+      (c) => c.habit === habit.id && c.completed_at === today
+    )
+);
+
+const markHabitDone = async (habitId) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    const alreadyCompleted = completions.some(
+      (c) => c.habit === habitId && c.completed_at === today
+    );
+
+    if (alreadyCompleted) return;
+
+    await createHabitCompletion({
+      habit: habitId,
+      completed_at: today,
+    });
+
+    const updatedCompletions = await getHabitCompletions();
+    setCompletions(updatedCompletions);
+  } catch (e) {
+    console.error("Failed to mark habit done", e);
+  }
+};
+
 
   return (
     <div className="home-container">
@@ -149,17 +183,23 @@ export default function HomePage({ setIsAuth }) {
     <p>No habits yet</p>
   )}
 
-  {habits.slice(0, 3).map((habit) => (
+  {todayHabits.slice(0, 3).map((habit) => (
   <div key={habit.id} className="habit-card">
     <div className="habit-info">
       <div className="habit-title">{habit.name}</div>
       <div className="habit-desc">{habit.description}</div>
     </div>
     <div className="habit-actions">
-      <button className="habit-done-btn">Mark as done</button>
+      <button
+        className="habit-done-btn"
+        onClick={() => markHabitDone(habit.id)}
+      >
+        Mark as done
+      </button>
     </div>
   </div>
 ))}
+
 
     <div className="add-habit" onClick={() => navigate("/habits/create")}>+ Add New Habit</div>
   </div>

@@ -8,7 +8,7 @@ import { getHabits, deleteHabit } from "../services/habits";
 import { getHabitCompletions, createHabitCompletion } from "../services/habitCompletions";
 import { getProfile } from "../services/users";
 
-import HomeLogo from "../components/HomeLogo.png";
+import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
@@ -224,14 +224,6 @@ const todayHabits = habits.filter(
     <div className="habit-info">
       <div className="habit-title">{habit.name}</div>
       <div className="habit-desc">{habit.description}</div>
-    </div>
-    <div className="habit-actions">
-      <button
-        className="habit-delete-btn"
-        onClick={() => handleDelete(habit.id)}
-      >
-        Delete
-      </button>
     </div>
   </div>
 ))}

@@ -4,7 +4,7 @@ import "../styles/HomePage.css";
 import "../styles/SettingsPage.css";
 
 import Avatar from "../components/Avatar";
-import HomeLogo from "../components/HomeLogo.png";
+import HomeLogo from "../assets/HomeLogo.png";
 import {getProfile} from "../services/users"
 
 import dashboard_icon from "../assets/dashboard_icon.png";

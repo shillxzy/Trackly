@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getProfile, patchProfile } from "../services/users";
 import Avatar from "../components/Avatar";
-import HomeLogo from "../components/HomeLogo.png";
+import HomeLogo from "../assets/HomeLogo.png";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
 import habits_icon from "../assets/habits_icon.png";
@@ -136,8 +136,6 @@ setUser(updatedProfile);
 
   setFormData(prev => ({ ...prev, avatar: file }));
 };
-
-
 
   return (
     <div className="home-container">
