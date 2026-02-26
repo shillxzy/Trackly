@@ -12,6 +12,7 @@ import FocusSessionPage from "./pages/FocusSesstionPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import HabitAboutPage from "./pages/HabitAboutPage";
 import HabitEditPage from "./pages/HabitEditPage";
+import SettingsPage from "./pages/SettingsPage";
 
 
 function PageWrapper({ children }) {
@@ -77,6 +78,11 @@ function App() {
           <Route
             path="/profile"
             element={isAuth ? <ProfilePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/settings"
+            element={isAuth ? <SettingsPage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
           />
 
           <Route
