@@ -5,6 +5,7 @@ import "../styles/SettingsPage.css";
 
 import Avatar from "../components/Avatar";
 import HomeLogo from "../assets/HomeLogo.png";
+import ExitButton from "../components/ExitButton";
 import {getProfile} from "../services/users"
 
 import dashboard_icon from "../assets/dashboard_icon.png";
@@ -113,12 +114,7 @@ export default function SettingsPage({ setIsAuth }) {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-start", margin: "5px 0 40px 0" }}>
-    <button className="exit-btn" onClick={() => {
-      const lastPath = sessionStorage.getItem("lastPath") || "/home";
-      navigate(lastPath);
-    }}>⬅ Exit</button>
-  </div>
+        <ExitButton />
 
         <div className="settings-container">
           <div className="settings-card">

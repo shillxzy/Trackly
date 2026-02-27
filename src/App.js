@@ -13,6 +13,8 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import HabitAboutPage from "./pages/HabitAboutPage";
 import HabitEditPage from "./pages/HabitEditPage";
 import SettingsPage from "./pages/SettingsPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import FocusSessionHistoryPage from "./pages/FocusSessionHistoryPage";
 
 
 function PageWrapper({ children }) {
@@ -71,6 +73,11 @@ function App() {
           />
 
           <Route
+            path="/reset-password"
+            element={isAuth ? <Navigate to="/home" /> : <ResetPasswordPage />}
+          />
+
+          <Route
             path="/home"
             element={isAuth ? <HomePage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
           />
@@ -108,6 +115,11 @@ function App() {
           <Route
             path="/focus-session"
             element={isAuth ? <FocusSessionPage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/focus-session/history"
+            element={isAuth ? <FocusSessionHistoryPage setIsAuth={setIsAuth} /> : <Navigate to="/login" />}
           />
 
           <Route

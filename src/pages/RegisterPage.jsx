@@ -31,6 +31,9 @@ export default function RegisterPage() {
     <div className="login-container">
       <div className="login-card">
         <h1>Register</h1>
+        <p className="subtitle">
+          Create accounts and start planning your habits!
+        </p>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
 

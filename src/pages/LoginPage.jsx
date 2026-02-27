@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "../styles/LoginPage.css";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../services/auth";
 import { useNavigate, Link } from "react-router-dom";
+
 
 export default function LoginPage({ setIsAuth }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +29,11 @@ const handleSubmit = async (e) => {
     setError(err.message);
   }
 };
+
+const handleGoogleLogin = () => {
+  window.location.href = 'http://localhost:8000/accounts/google/login/?next=http://localhost:3000/home';
+};
+
 
   return (
     <div className="login-container">
@@ -72,7 +78,7 @@ const handleSubmit = async (e) => {
             </span>
           </div>
 
-          <a href="/refresh-password" className="forgot">
+          <a href="/reset-password" className="forgot">
             Forgot your password?
           </a>
 
@@ -94,7 +100,8 @@ const handleSubmit = async (e) => {
 
           <div className="divider"></div>
 
-          <button type="button" className="google-btn">
+          <button type="button" className="google-btn" onClick={handleGoogleLogin}>
+            <FaGoogle className="google-icon" />
             Sign in with Google
           </button>
 

@@ -10,6 +10,7 @@ import { getProfile } from "../services/users";
 
 import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
+import ExitButton from "../components/ExitButton";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
 import habits_icon from "../assets/habits_icon.png";
@@ -213,11 +214,7 @@ export default function HabitEditPage({ setIsAuth }) {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-start", margin: "5px 0 40px 0" }}>
-          <button className="exit-btn" onClick={() => navigate(-1)}>
-            ⬅ Exit
-          </button>
-        </div>
+        <ExitButton />
 
         <div className="habit-edit-card">
           <div className="form-group">

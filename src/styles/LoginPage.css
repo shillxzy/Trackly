@@ -25,7 +25,12 @@ html, body {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+
+  width: 100%;
+  max-width: 400px;    
+  min-height: 520px;   
 }
+
 
 .login-card h1 {
   margin-bottom: 7px;
@@ -201,4 +206,15 @@ input:checked + .slider:before {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-icon {
+  font-size: 18px;
 }

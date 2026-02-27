@@ -18,6 +18,7 @@ import logout_icon from "../assets/logout_icon.png";
 
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import ExitButton from "../components/ExitButton";
 
 export const useBack = () => {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ export const useBack = () => {
 
 export default function HabitCreatePage({ setIsAuth }) {
   const navigate = useNavigate();
-  const goBack = useBack();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -206,11 +206,7 @@ const buildDayOfWeekMask = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-start", margin: "5px 0 40px 0" }}>
-          <button className="exit-btn" onClick={goBack}>
-            ⬅ Exit
-          </button>
-        </div>
+        <ExitButton/>
 
         <div className="habit-create-card">
           <div className="form-group">
