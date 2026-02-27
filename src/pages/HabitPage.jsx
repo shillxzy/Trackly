@@ -31,18 +31,32 @@ export default function HabitPage({ setIsAuth }) {
   }, []);
 
   const loadData = async () => {
-    try {
-      const profile = await getProfile();
-      const habitsData = await getHabits();
-      const completionsData = await getHabitCompletions();
+  try {
+    const cachedProfile = localStorage.getItem("profile");
+    const cachedHabits = localStorage.getItem("habits");
+    const cachedCompletions = localStorage.getItem("completions");
 
-      setUser(profile);
-      setHabits(habitsData);
-      setCompletions(completionsData);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+    if (cachedProfile) setUser(JSON.parse(cachedProfile));
+    if (cachedHabits) setHabits(JSON.parse(cachedHabits));
+    if (cachedCompletions) setCompletions(JSON.parse(cachedCompletions));
+
+    // фонове оновлення, щоб мати свіжі дані
+    const profile = await getProfile();
+    const habitsData = await getHabits();
+    const completionsData = await getHabitCompletions();
+
+    setUser(profile);
+    setHabits(habitsData);
+    setCompletions(completionsData);
+
+    localStorage.setItem("profile", JSON.stringify(profile));
+    localStorage.setItem("habits", JSON.stringify(habitsData));
+    localStorage.setItem("completions", JSON.stringify(completionsData));
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -87,25 +101,22 @@ const todayHabits = habits.filter(
       (c) => c.habit === habitId && c.completed_at === today
     );
 
-    if (alreadyCompleted) {
-      console.log("Habit already marked as done today!");
-      return; 
-    }
+    if (alreadyCompleted) return;
 
     await createHabitCompletion({
       habit: habitId,
       completed_at: today
     });
-
-    const updatedCompletions = await getHabitCompletions();
+    
+    const newCompletion = { habit: habitId, completed_at: today };
+    const updatedCompletions = [...completions, newCompletion];
     setCompletions(updatedCompletions);
 
+    localStorage.setItem("completions", JSON.stringify(updatedCompletions));
   } catch (err) {
     console.error("Failed to mark habit done", err);
   }
 };
-
-
 
 
 

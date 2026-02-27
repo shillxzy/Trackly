@@ -43,10 +43,19 @@ export default function FocusSessionHistoryPage({ setIsAuth })
 
   const loadData = async () => {
     try {
+  
+      const cachedProfile = localStorage.getItem("profile");
+  
+      if (cachedProfile) {
+        setUser(JSON.parse(cachedProfile));
+        return; 
+      }
+  
       const profile = await getProfile();
-
-
+  
       setUser(profile);
+  
+      localStorage.setItem("profile", JSON.stringify(profile));
     } catch (e) {
       console.error(e);
     }

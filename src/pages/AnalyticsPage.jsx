@@ -36,18 +36,34 @@ export default function AnalyticsPage({ setIsAuth })
   }, []);
 
   const loadData = async () => {
-    try {
-      const profile = await getProfile();
-      const habitsData = await getHabits();
-      const completionsData = await getHabitCompletions();
+  try {
 
-      setUser(profile);
-      setHabits(habitsData);
-      setCompletions(completionsData);
-    } catch (e) {
-      console.error(e);
+    const cachedProfile = localStorage.getItem("profile");
+    const cachedHabits = localStorage.getItem("habits");
+    const cachedCompletions = localStorage.getItem("completions");
+
+    if (cachedProfile && cachedHabits && cachedCompletions) {
+      setUser(JSON.parse(cachedProfile));
+      setHabits(JSON.parse(cachedHabits));
+      setCompletions(JSON.parse(cachedCompletions));
+      return; 
     }
-  };
+
+    const profile = await getProfile();
+    const habitsData = await getHabits();
+    const completionsData = await getHabitCompletions();
+
+    setUser(profile);
+    setHabits(habitsData);
+    setCompletions(completionsData);
+
+    localStorage.setItem("profile", JSON.stringify(profile));
+    localStorage.setItem("habits", JSON.stringify(habitsData));
+    localStorage.setItem("completions", JSON.stringify(completionsData));
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");

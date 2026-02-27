@@ -33,14 +33,24 @@ export default function SettingsPage({ setIsAuth }) {
     }, []);
 
     const loadData = async () => {
-        try {
-          const profile = await getProfile();
-    
-          setUser(profile);
-        } catch (e) {
-          console.error(e);
-        }
-      };
+    try {
+  
+      const cachedProfile = localStorage.getItem("profile");
+  
+      if (cachedProfile) {
+        setUser(JSON.parse(cachedProfile));
+        return; 
+      }
+  
+      const profile = await getProfile();
+  
+      setUser(profile);
+  
+      localStorage.setItem("profile", JSON.stringify(profile));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");

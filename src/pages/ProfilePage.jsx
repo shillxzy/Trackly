@@ -81,18 +81,34 @@ const handleChangePassword = async () => {
   }, []);
 
   const loadProfile = async () => {
-    try {
-      const profile = await getProfile();
+  try {
+    const cachedProfile = localStorage.getItem("profile");
+
+    if (cachedProfile) {
+      const profile = JSON.parse(cachedProfile);
       setUser(profile);
       setFormData({
         username: profile.username || "",
         fullname: profile.fullname || "",
         email: profile.email || "",
       });
-    } catch (e) {
-      console.error(e);
+      return; 
     }
-  };
+
+    const profile = await getProfile();
+    setUser(profile);
+    setFormData({
+      username: profile.username || "",
+      fullname: profile.fullname || "",
+      email: profile.email || "",
+    });
+
+    localStorage.setItem("profile", JSON.stringify(profile));
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
