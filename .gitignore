@@ -51,6 +51,9 @@ Thumbs.db
 ehthumbs.db
 Icon?
 
+# Media / uploaded files
+/media
+
 # =========================
 # PyCharm
 # =========================

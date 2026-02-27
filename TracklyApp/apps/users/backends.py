@@ -4,9 +4,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class EmailOrUsernameBackend(ModelBackend):
-    """
-    Аутентифікація через username або email.
-    """
     def authenticate(self, request, username=None, password=None, **kwargs):
         identifier = username or kwargs.get('identifier')
         if not identifier or not password:
