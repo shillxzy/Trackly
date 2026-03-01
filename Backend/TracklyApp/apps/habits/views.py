@@ -26,6 +26,10 @@ class BaseUserModelViewSet(ModelViewSet):
             serializer.save()
         else:
             serializer.save(user=self.request.user)
+        if serializer.Meta.model.__name__ == "FocusSession":
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
         instance.delete()
@@ -56,3 +60,7 @@ class HabitCompletionView(BaseUserModelViewSet):
 class FocusSessionView(BaseUserModelViewSet):
     queryset = FocusSession.objects.all()
     serializer_class = FocusSessionSerializer
+
+    def create(self, request, *args, **kwargs):
+        print("Incoming payload:", request.data)
+        return super().create(request, *args, **kwargs)

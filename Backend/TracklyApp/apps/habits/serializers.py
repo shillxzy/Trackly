@@ -35,6 +35,7 @@ class HabitScheduleSerializer(serializers.ModelSerializer):
 
 
 class FocusSessionSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = FocusSession
         fields = ("id", "user", "started_at", "ended_at", "planned_duration_minutes", "actual_duration_minutes", "status",)
