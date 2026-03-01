@@ -1,5 +1,3 @@
-import os
-from decouple import config
 from .base import *
 
 DEBUG = False
@@ -25,7 +23,7 @@ DATABASES = {
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "https://trackly-frontend-f4ri.onrender.com",  # фронтенд
+    "https://trackly-frontend-f4ri.onrender.com",
 ]
 
 SECURE_SSL_REDIRECT = True
