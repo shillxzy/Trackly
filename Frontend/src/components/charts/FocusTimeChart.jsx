@@ -39,7 +39,8 @@ export default function FocusTimeChart() {
               </linearGradient>
             </defs>
             <XAxis dataKey="day" />
-            <YAxis />
+            {/* Фіксована вісь Y від 0 до 25 */}
+            <YAxis domain={[0, 25]} />
             <Tooltip />
             <Area
               type="monotone"
