@@ -109,7 +109,7 @@ const handleStop = async () => {
       ended_at: endedAt.toISOString(),
       planned_duration_minutes: Math.round(FOCUS_DURATION / 60),
       actual_duration_minutes: spentMinutes,
-      status: "completed", // має збігатися з STATUS_CHOICES у Django
+      status: "completed", 
     };
 
     console.log("Payload for focus session:", payload);

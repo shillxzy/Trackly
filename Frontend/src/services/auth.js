@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = process.env.REACT_APP_API_URL;
 
 function getToken(key) {
   return localStorage.getItem(key) || sessionStorage.getItem(key);
@@ -18,7 +18,6 @@ async function refreshAccessToken() {
 
   const data = await res.json();
 
-  // оновлюємо там же, де лежав refresh
   const storage = localStorage.getItem("refresh_token")
     ? localStorage
     : sessionStorage;
