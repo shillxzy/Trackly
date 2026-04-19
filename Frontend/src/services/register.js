@@ -22,7 +22,7 @@ export async function request(url, options = {}) {
 
 
 export async function registerUser(data) {
-  const res = await request("/users/register/", {
+  const res = await request("/accounts/register/", {
     method: "POST",
     body: JSON.stringify(data),
   });

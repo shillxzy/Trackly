@@ -66,13 +66,17 @@ export default function AnalyticsPage({ setIsAuth })
 };
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("refresh_token");
-    setIsAuth(false);
-    navigate("/login");
-  };
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("profile");
+  localStorage.removeItem("habits");
+  localStorage.removeItem("completions");
+  sessionStorage.removeItem("access_token");
+  sessionStorage.removeItem("refresh_token");
+  setIsAuth(false); 
+  navigate("/login");
+};
+
 
 
   return (

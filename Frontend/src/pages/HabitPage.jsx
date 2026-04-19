@@ -6,6 +6,7 @@ import "../styles/FocusSession.css"
 
 import { getHabits, deleteHabit } from "../services/habits";
 import { getHabitCompletions, createHabitCompletion } from "../services/habitCompletions";
+import { getHabitSchedules } from "../services/habitSchedules";
 import { getProfile } from "../services/users";
 
 import HomeLogo from "../assets/HomeLogo.png";
@@ -19,6 +20,7 @@ import logout_icon from "../assets/logout_icon.png";
 
 export default function HabitPage({ setIsAuth }) {
   const navigate = useNavigate();
+  
 
   const [user, setUser] = useState(null);
   const [habits, setHabits] = useState([]);
@@ -40,17 +42,22 @@ export default function HabitPage({ setIsAuth }) {
     if (cachedHabits) setHabits(JSON.parse(cachedHabits));
     if (cachedCompletions) setCompletions(JSON.parse(cachedCompletions));
 
-    // фонове оновлення, щоб мати свіжі дані
     const profile = await getProfile();
     const habitsData = await getHabits();
     const completionsData = await getHabitCompletions();
+    const schedulesData = await getHabitSchedules();
+
+    const habitsWithSchedules = habitsData.map(habit => {
+      const schedule = schedulesData.find(s => s.habit === habit.id);
+      return { ...habit, schedule }; 
+    });
 
     setUser(profile);
-    setHabits(habitsData);
+    setHabits(habitsWithSchedules);
     setCompletions(completionsData);
 
     localStorage.setItem("profile", JSON.stringify(profile));
-    localStorage.setItem("habits", JSON.stringify(habitsData));
+    localStorage.setItem("habits", JSON.stringify(habitsWithSchedules));
     localStorage.setItem("completions", JSON.stringify(completionsData));
   } catch (e) {
     console.error(e);
@@ -59,29 +66,67 @@ export default function HabitPage({ setIsAuth }) {
 
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("refresh_token");
-    setIsAuth(false);
-    navigate("/login");
-  };
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("profile");
+  localStorage.removeItem("habits");
+  localStorage.removeItem("completions");
+  sessionStorage.removeItem("access_token");
+  sessionStorage.removeItem("refresh_token");
+  setIsAuth(false); 
+  navigate("/login");
+};
+
 
   const today = new Date().toISOString().split("T")[0];
 
-const completedHabits = habits.filter((habit) =>
-  completions.some(
-    (c) => c.habit === habit.id && c.completed_at === today
-  )
-);
+  const todayDate = new Date();
+const todayWeekDay = todayDate.getDay();
 
-const todayHabits = habits.filter(
+const dayMap = {
+  1: 1,
+  2: 2,
+  3: 4,
+  4: 8,
+  5: 16,
+  6: 32,
+  0: 64,
+};
+
+const todayMask = dayMap[todayWeekDay];
+
+const isHabitScheduledToday = (habit) => {
+  if (!habit.schedule) return false;
+
+  const schedule = Array.isArray(habit.schedule)
+    ? habit.schedule[0]
+    : habit.schedule;
+
+  if (!schedule) return false;
+
+  const mask = schedule.day_of_week;
+
+  console.log("habit:", habit.name, "mask:", mask, "todayMask:", todayMask);
+
+  return (mask & todayMask) !== 0;
+};
+
+
+const completedHabits = habits.filter(
   (habit) =>
-    !completions.some(
+    isHabitScheduledToday(habit) &&
+    completions.some(
       (c) => c.habit === habit.id && c.completed_at === today
     )
 );
 
+const todayHabits = habits.filter(
+  (habit) =>
+    isHabitScheduledToday(habit) &&
+    !completions.some(
+      (c) => c.habit === habit.id && c.completed_at === today
+    )
+);
 
   const handleDelete = async (habitId) => {
     if (!window.confirm("Are you sure you want to delete this habit?")) return;
@@ -117,6 +162,13 @@ const todayHabits = habits.filter(
     console.error("Failed to mark habit done", err);
   }
 };
+
+const allHabits = habits;
+
+
+console.log("today weekday:", todayWeekDay);
+console.log("todayMask:", todayMask);
+console.log("ALL HABITS:", habits);
 
 
 
@@ -226,6 +278,56 @@ const todayHabits = habits.filter(
             + Add New Habit
           </div>
         </div>
+
+        <div className="tasks-section" style={{ width: "70%" }}>
+  <h2>All Habits</h2>
+
+  <div className="habits-list">
+    {allHabits.map((habit) => (
+      <div key={habit.id} className="habit-card">
+        <div className="habit-info">
+          <div className="habit-title">{habit.name}</div>
+          <div className="habit-desc">{habit.description}</div>
+        </div>
+
+        <div className="habit-actions">
+          <button
+  className="habit-done-btn"
+  onClick={() => markHabitDone(habit.id)}
+>
+  Mark as done
+</button>
+
+          <div className="habit-menu-wrapper">
+            <button
+              className="habit-details-btn"
+              onClick={() =>
+                setHabitMenuOpen(habitMenuOpen === habit.id ? null : habit.id)
+              }
+            >
+              ↓
+            </button>
+
+            {habitMenuOpen === habit.id && (
+              <div className="habit-dropdown-menu">
+                <button onClick={() => navigate(`/habits/about/${habit.id}`)}>
+                  About
+                </button>
+                <button onClick={() => navigate(`/habits/edit/${habit.id}`)}>
+                  Edit
+                </button>
+                <button onClick={() => handleDelete(habit.id)}>
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
 
         <div className="tasks-section" style={{ width: "70%" }}>
           <h2>Completed Tasks</h2>

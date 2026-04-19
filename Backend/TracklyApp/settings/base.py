@@ -7,9 +7,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 
-# Локальна розробка
 DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -19,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'TracklyApp.apps.habits',
-    'TracklyApp.apps.users',
+    'TracklyApp.apps.accounts',
     'drf_spectacular',
     'corsheaders',
     "django.contrib.sites",
@@ -41,7 +46,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -65,20 +69,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'TracklyApp.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-
-        }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT", default="5432"),
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -87,11 +89,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
 USE_TZ = True
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
 LOGIN_REDIRECT_URL = "http://localhost:3000/home"
 LOGOUT_REDIRECT_URL = "http://localhost:3000/login"
@@ -104,8 +104,8 @@ EMAIL_HOST_USER = config("SMTP_USER")
 EMAIL_HOST_PASSWORD = config("SMTP_PASS")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-
-STATIC_URL = 'static/'
+VAPID_PRIVATE_KEY = config("VAPID_PRIVATE_KEY")
+VAPID_PUBLIC_KEY = config("VAPID_PUBLIC_KEY")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -127,7 +127,7 @@ SPECTACULAR_SETTINGS = {
 SITE_ID = 3
 
 AUTHENTICATION_BACKENDS = [
-    'TracklyApp.apps.users.backends.EmailOrUsernameBackend',
+    'TracklyApp.apps.accounts.backends.EmailOrUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
     "allauth.account.auth_backends.AuthenticationBackend",
 ]

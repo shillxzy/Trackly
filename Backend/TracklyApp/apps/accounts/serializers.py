@@ -33,9 +33,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ("username", "email", "fullname", "avatar", "avatar_url", "theme", "timezone", "streak_days")
 
     def get_avatar_url(self, obj):
-        request = self.context.get("request")
         if obj.avatar:
-            return request.build_absolute_uri(obj.avatar.url)
+            try:
+                return obj.avatar.url
+            except Exception:
+                return None
         return None
 
     def update(self, instance, validated_data):

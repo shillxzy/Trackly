@@ -284,3 +284,39 @@
 }
 
 
+.days-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day-checkbox {
+  position: relative;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1c345a;
+}
+
+.day-checkbox input {
+  display: none;
+}
+
+.day-checkbox span {
+  display: block;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #cfd6e6;
+  background: #f6f6f9;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.day-checkbox input:checked + span {
+  background: #3f6edc;
+  color: white;
+  border-color: #3f6edc;
+}
+
+.day-checkbox span:hover {
+  opacity: 0.9;
+}

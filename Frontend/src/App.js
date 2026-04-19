@@ -15,7 +15,7 @@ import HabitEditPage from "./pages/HabitEditPage";
 import SettingsPage from "./pages/SettingsPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import FocusSessionHistoryPage from "./pages/FocusSessionHistoryPage";
-
+import { initPush } from "./utils/pushClient";
 
 function PageWrapper({ children }) {
   const location = useLocation();
@@ -42,6 +42,8 @@ function PageWrapper({ children }) {
   );
 }
 
+
+
 function App() {
   const [isAuth, setIsAuth] = useState(null);
 
@@ -49,6 +51,12 @@ function App() {
     const token = localStorage.getItem("access_token");
     setIsAuth(!!token);
   }, []);
+
+  useEffect(() => {
+    if (isAuth) {
+      initPush();
+    }
+  }, [isAuth]);
 
   if (isAuth === null) return <Loading />; 
 

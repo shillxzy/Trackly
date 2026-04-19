@@ -6,11 +6,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.conf import settings
-
+from rest_framework.permissions import IsAuthenticated
+import json
+from pywebpush import webpush
 
 from .serializers import (RegisterSerializer, ProfileSerializer, ChangePasswordSerializer,
                           PasswordResetConfirmSerializer, PasswordResetRequestSerializer, PasswordResetVerifySerializer)
-from .models import Profile
+from .models import Profile, PushSubscription
 import random, string, datetime
 
 User = get_user_model()
@@ -31,7 +33,8 @@ class MeProfileView(generics.RetrieveUpdateAPIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def get_object(self):
-        return Profile.objects.get(user=self.request.user)
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        return profile
 
 
 class ChangePasswordView(APIView):
@@ -140,3 +143,41 @@ class PasswordResetConfirmView(APIView):
         reset_codes.pop(email, None)
 
         return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
+
+
+class SavePushSubscriptionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        subscription = request.data
+
+        obj, created = PushSubscription.objects.update_or_create(
+            user=request.user,
+            defaults={"subscription": subscription}
+        )
+
+        return Response({
+            "status": "ok",
+            "created": created
+        })
+
+
+class SendPushView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        subs = PushSubscription.objects.filter(user=request.user)
+
+        for sub in subs:
+            webpush(
+                subscription_info=sub.subscription,
+                data=json.dumps({
+                    "title": "Нагадування",
+                    "body": "Не забудь виконати звички сьогодні"
+                }),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims={"sub": "mailto:admin@trackly.local"}
+            )
+
+        return Response({"status": "sent"})
+

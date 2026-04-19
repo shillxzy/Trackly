@@ -16,101 +16,64 @@ import focussession_icon from "../assets/focussession_icon.png";
 import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
 
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
 import ExitButton from "../components/ExitButton";
-
-export const useBack = () => {
-  const navigate = useNavigate();
-
-  return () => {
-    const lastPath = sessionStorage.getItem("lastPath") || "/home";
-    navigate(lastPath);
-  };
-};
 
 export default function HabitCreatePage({ setIsAuth }) {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-
+  const [selectedDays, setSelectedDays] = useState(new Set()); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-      loadData();
-    }, []);
-  
-    const loadData = async () => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
     try {
-  
       const cachedProfile = localStorage.getItem("profile");
-  
       if (cachedProfile) {
         setUser(JSON.parse(cachedProfile));
-        return; 
+        return;
       }
-  
       const profile = await getProfile();
-  
       setUser(profile);
-  
       localStorage.setItem("profile", JSON.stringify(profile));
     } catch (e) {
       console.error(e);
     }
   };
 
-
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("profile");
+    localStorage.removeItem("habits");
+    localStorage.removeItem("completions");
     sessionStorage.removeItem("access_token");
     sessionStorage.removeItem("refresh_token");
-    setIsAuth(false);
+    setIsAuth(false); 
     navigate("/login");
   };
 
-const [dateRange, setDateRange] = useState(null);
-
-const onCalendarChange = (value) => {
-  setDateRange(value);
-};
-
-const buildDayOfWeekMask = () => {
-  if (!dateRange || !dateRange[0] || !dateRange[1]) return 0;
-
-  const start = dateRange[0];
-  const end = dateRange[1];
-  let mask = 0;
-
-  const map = {
-    1: 1,  
-    2: 2,  
-    3: 4,  
-    4: 8,  
-    5: 16, 
-    6: 32, 
-    0: 64, 
+  const toggleDay = (day) => {
+    const newSet = new Set(selectedDays);
+    if (newSet.has(day)) newSet.delete(day);
+    else newSet.add(day);
+    setSelectedDays(newSet);
   };
 
-  let current = new Date(start);
-  const activeDays = new Set();
-
-  while (current <= end) {
-    activeDays.add(current.getDay());
-    current.setDate(current.getDate() + 1);
-  }
-
-  activeDays.forEach(day => {
-    mask += map[day];
-  });
-
-  return mask;
-};
+  const buildDayOfWeekMask = () => {
+    if (selectedDays.size === 0) return 0;
+    const map = { 1:1, 2:2, 3:4, 4:8, 5:16, 6:32, 0:64 };
+    let mask = 0;
+    selectedDays.forEach(day => { mask += map[day]; });
+    return mask;
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -120,7 +83,7 @@ const buildDayOfWeekMask = () => {
 
     const mask = buildDayOfWeekMask();
     if (mask === 0) {
-      setError("Choose at least one day");
+      setError("Select at least one day");
       return;
     }
 
@@ -147,7 +110,16 @@ const buildDayOfWeekMask = () => {
       setLoading(false);
     }
   };
-  
+
+  const daysLabels = [
+    { label: "Mon", value: 1 },
+    { label: "Tue", value: 2 },
+    { label: "Wed", value: 3 },
+    { label: "Thu", value: 4 },
+    { label: "Fri", value: 5 },
+    { label: "Sat", value: 6 },
+    { label: "Sun", value: 0 },
+  ];
 
   return (
     <div className="home-container">
@@ -159,29 +131,23 @@ const buildDayOfWeekMask = () => {
           <hr className="sidebar-divider" />
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" />
-              Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
             </button>
             <button className="nav-item active" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" />
-              Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> Habits
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" />
-              Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" />
-              Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
             </button>
           </nav>
         </div>
-
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" />
-            Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> Log out
           </button>
         </div>
       </aside>
@@ -200,16 +166,13 @@ const buildDayOfWeekMask = () => {
               className="profile-icon"
               onClick={() => setMenuOpen(!menuOpen)}
             />
-
             {menuOpen && (
               <div className="profile-menu">
                 <button onClick={() => navigate("/profile")}>Profile</button>
                 <hr className="menu-divider" />
                 <button onClick={() => navigate("/settings")}>Settings</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>
-                  Log out
-                </button>
+                <button className="logout-item" onClick={handleLogout}>Log out</button>
               </div>
             )}
           </div>
@@ -238,36 +201,26 @@ const buildDayOfWeekMask = () => {
           </div>
 
           <div className="form-group">
-  <label>Schedule</label>
+            <label>Days of the week</label>
+            <div className="days-checkboxes">
+              {daysLabels.map(day => (
+               <label key={day.value} className="day-checkbox">
+  <input
+    type="checkbox"
+    checked={selectedDays.has(day.value)}
+    onChange={() => toggleDay(day.value)}
+  />
+  <span>{day.label}</span>
+</label>
 
-  <Calendar
-  onChange={onCalendarChange}
-  value={dateRange}
-  selectRange={true}
-  tileClassName={({ date, view }) => {
-    if (view === "month" && dateRange && dateRange[0] && dateRange[1]) {
-      const start = new Date(dateRange[0]);
-      const end = new Date(dateRange[1]);
-      if (date >= start && date <= end) {
-        return "calendar-day-active-range";
-      }
-    }
-  }}
-/>
-
-
-  <div className="calendar-hint">
-    Click any date to select that weekday
-  </div>
-</div>
-
+              ))}
+            </div>
+          </div>
 
           {error && <div className="form-error">{error}</div>}
 
           <div className="form-actions">
-            <button className="cancel-btn" onClick={() => navigate("/habits")}>
-              Cancel
-            </button>
+            <button className="cancel-btn" onClick={() => navigate("/habits")}>Cancel</button>
             <button className="save-btn" onClick={handleSave} disabled={loading}>
               {loading ? "Saving..." : "Save habit"}
             </button>

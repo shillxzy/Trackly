@@ -20,15 +20,22 @@ export default function LoginPage({ setIsAuth }) {
 const handleSubmit = async (e) => {
   e.preventDefault();
   setError(null);
+
   try {
-    await loginUser(form, remember); 
-    alert("Успішний вхід!");
+    const data = await loginUser(form, remember);
+
+    localStorage.setItem("access_token", data.access);
+    localStorage.setItem("refresh_token", data.refresh);
+
     setIsAuth(true);
+
     navigate("/");
   } catch (err) {
     setError(err.message);
   }
 };
+
+
 
 const handleGoogleLogin = () => {
   window.location.href = 'http://localhost:8000/accounts/google/login/?next=http://localhost:3000/home';

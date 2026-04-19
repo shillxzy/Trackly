@@ -17,17 +17,28 @@ class BaseUserModelViewSet(ModelViewSet):
         return queryset.filter(user=user)
 
     def perform_create(self, serializer):
-        if serializer.Meta.model.__name__ == "HabitSchedule":
+        model_name = serializer.Meta.model.__name__
+
+        if model_name == "HabitSchedule":
             habit = serializer.validated_data.get("habit")
+
             if habit.user != self.request.user:
-                raise PermissionError("Cannot create schedule for another user's habit")
+                raise PermissionError(
+                    "Cannot create schedule for another user's habit"
+                )
+
             serializer.save()
-        elif serializer.Meta.model.__name__ == "HabitCompletion":
+
+        elif model_name == "HabitCompletion":
+            habit = serializer.validated_data.get("habit")
+
+            if habit.user != self.request.user:
+                raise PermissionError(
+                    "Cannot complete another user's habit"
+                )
+
             serializer.save()
-        else:
-            serializer.save(user=self.request.user)
-        if serializer.Meta.model.__name__ == "FocusSession":
-            serializer.save(user=self.request.user)
+
         else:
             serializer.save(user=self.request.user)
 
