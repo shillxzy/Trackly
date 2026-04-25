@@ -2,7 +2,7 @@ name: Check Habits Cron
 
 on:
   schedule:
-    - cron: "0 19 * * *"  # 19:00 UTC
+    - cron: "0 16 * * *"  # 19:00 UTC
   workflow_dispatch:  # можна запускати вручну
 
 jobs:
