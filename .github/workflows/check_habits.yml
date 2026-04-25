@@ -2,8 +2,8 @@ name: Check Habits Cron
 
 on:
   schedule:
-    - cron: "0 16 * * *"  # 19:00 UTC
-  workflow_dispatch:  # можна запускати вручну
+    - cron: "0 16 * * *"
+  workflow_dispatch:
 
 jobs:
   check-habits:
@@ -19,13 +19,12 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install -r Backend/requirements.txt
+        run: pip install -r Backend/requirements.txt
 
       - name: Run Django command
-        run: |
-          python Backend/manage.py check_habits
+        run: python Backend/manage.py check_habits
         env:
+          DJANGO_SETTINGS_MODULE: TracklyApp.settings.prod
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
