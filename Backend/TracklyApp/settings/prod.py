@@ -3,7 +3,11 @@ from .base import *
 DEBUG = False
 
 RENDER_HOST = "trackly-0xg3.onrender.com"
-ALLOWED_HOSTS = [RENDER_HOST]
+ALLOWED_HOSTS = [
+    "trackly-0xg3.onrender.com",
+    ".onrender.com",
+]
+
 
 CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_HOST}"]
 
@@ -25,6 +29,9 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://trackly-frontend-f4ri.onrender.com",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE = True
