@@ -1,22 +1,31 @@
-# accounts/urls.py
 from django.urls import path
-from .views import (RegisterView, MeProfileView, ChangePasswordView,
-                    LoginView, PasswordResetRequestView, PasswordResetVerifyView, PasswordResetConfirmView, SavePushSubscriptionView, SendPushView)
-from django.conf import settings
-from django.conf.urls.static import static
+from .views import (
+    RegisterView, RegisterVerifyView,
+    MeProfileView, ChangePasswordView,
+    LoginView, LoginRequestCodeView, LoginVerifyView,
+    PasswordResetRequestView, PasswordResetVerifyView, PasswordResetConfirmView,
+    SavePushSubscriptionView, SendPushView
+)
 
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="register"),
-    path("me/profile/", MeProfileView.as_view(), name="me-profile"),
-    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
-    path("login/", LoginView.as_view(), name="login"),
+    # AUTH
+    path("register/", RegisterView.as_view()),
+    path("register/verify/", RegisterVerifyView.as_view()),
+
+    path("login/", LoginView.as_view()),
+    path("login/request-code/", LoginRequestCodeView.as_view()),
+    path("login/verify/", LoginVerifyView.as_view()),
+
+    # PASSWORD RESET
     path("password-reset/request/", PasswordResetRequestView.as_view()),
     path("password-reset/verify/", PasswordResetVerifyView.as_view()),
     path("password-reset/confirm/", PasswordResetConfirmView.as_view()),
 
-    path("push/subscribe/", SavePushSubscriptionView.as_view(), name="push-subscribe"),
-    path("push/send/", SendPushView.as_view(), name="push-send"),
-]
+    # PROFILE
+    path("me/profile/", MeProfileView.as_view()),
+    path("change-password/", ChangePasswordView.as_view()),
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # PUSH
+    path("push/subscribe/", SavePushSubscriptionView.as_view()),
+    path("push/send/", SendPushView.as_view()),
+]

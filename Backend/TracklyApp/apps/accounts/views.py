@@ -12,19 +12,63 @@ from pywebpush import webpush
 
 from .serializers import (RegisterSerializer, ProfileSerializer, ChangePasswordSerializer,
                           PasswordResetConfirmSerializer, PasswordResetRequestSerializer, PasswordResetVerifySerializer)
-from .models import Profile, PushSubscription
+from .models import Profile, PushSubscription, EmailOTP
 import random, string, datetime
+from .utils import generate_otp
 
 User = get_user_model()
 
-reset_codes = {}
-reset_tokens = {}
 
 
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
+
+class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save(is_active=False)
+
+        code = generate_otp(user.email, "register")
+
+        send_mail(
+            subject="Your verification code",
+            message=f"Code: {code}",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+
+        return Response({"detail": "Verification code sent"})
+
+
+class RegisterVerifyView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data["email"]
+        code = request.data["code"]
+
+        otp = EmailOTP.objects.filter(
+            email=email,
+            purpose="register",
+            used=False
+        ).order_by("-id").first()
+
+        if not otp or not otp.is_valid():
+            return Response({"detail": "Invalid or expired code"}, status=400)
+
+        if otp.code != code:
+            return Response({"detail": "Wrong code"}, status=400)
+
+        user = User.objects.get(email=email)
+        user.is_active = True
+        user.save()
+
+        otp.used = True
+        otp.save()
+
+        return Response({"detail": "Account verified"})
 
 
 class MeProfileView(generics.RetrieveUpdateAPIView):
@@ -68,81 +112,139 @@ class LoginView(APIView):
             "username": user.username
         }, status=status.HTTP_200_OK)
 
-
-
-class PasswordResetRequestView(APIView):
-    permission_classes = []
+class LoginRequestCodeView(APIView):
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = PasswordResetRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
+        email = request.data["email"]
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"detail": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"detail": "User not found"}, status=404)
 
-        code = f"{random.randint(100000, 999999)}"
-        expires = datetime.datetime.now() + datetime.timedelta(minutes=10)
-        reset_codes[email] = {"code": code, "expires": expires}
+        code = generate_otp(email, "login")
 
         send_mail(
-            subject="Password Reset Code",
-            message=f"Your password reset code is: {code}",
+            subject="Login code",
+            message=f"Your login code: {code}",
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
         )
 
-        return Response({"detail": "Code sent to email"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Code sent"})
+
+
+class LoginVerifyView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data["email"]
+        code = request.data["code"]
+
+        otp = EmailOTP.objects.filter(
+            email=email,
+            purpose="login",
+            used=False
+        ).order_by("-id").first()
+
+        if not otp or not otp.is_valid():
+            return Response({"detail": "Invalid or expired code"}, status=400)
+
+        if otp.code != code:
+            return Response({"detail": "Wrong code"}, status=400)
+
+        user = User.objects.get(email=email)
+
+        refresh = RefreshToken.for_user(user)
+
+        otp.used = True
+        otp.save()
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
+        })
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data["email"]
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"detail": "Email not found"}, status=404)
+
+        code = generate_otp(email, "reset")
+
+        send_mail(
+            subject="Password reset code",
+            message=f"Code: {code}",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+        )
+
+        return Response({"detail": "OTP sent"})
 
 
 class PasswordResetVerifyView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = PasswordResetVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
-        code = serializer.validated_data["code"]
+        email = request.data["email"]
+        code = request.data["code"]
 
-        if email not in reset_codes:
-            return Response({"detail": "No reset request found"}, status=status.HTTP_400_BAD_REQUEST)
+        otp = EmailOTP.objects.filter(
+            email=email,
+            purpose="reset",
+            used=False
+        ).order_by("-id").first()
 
-        saved = reset_codes[email]
-        if saved["code"] != code or datetime.datetime.now() > saved["expires"]:
-            return Response({"detail": "Invalid or expired code"}, status=status.HTTP_400_BAD_REQUEST)
+        if not otp or not otp.is_valid():
+            return Response({"detail": "Invalid OTP"}, status=400)
+
+        if otp.code != code:
+            return Response({"detail": "Wrong code"}, status=400)
 
         token = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-        reset_tokens[token] = email
 
-        return Response({"token": token}, status=status.HTTP_200_OK)
+        # 🔥 ВАЖЛИВО: ЗБЕРІГАЄМО TOKEN
+        otp.token = token
+        otp.used = True
+        otp.save()
+
+        return Response({"token": token})
 
 
 class PasswordResetConfirmView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data["token"]
-        new_password = serializer.validated_data["new_password"]
+        token = request.data["token"]
+        new_password = request.data["new_password"]
 
-        if token not in reset_tokens:
-            return Response({"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        otp = EmailOTP.objects.filter(
+            token=token,
+            purpose="reset",
+            used=True
+        ).first()
 
-        email = reset_tokens[token]
-        try:
-            user = User.objects.get(email=email)
-            user.set_password(new_password)
-            user.save()
-        except User.DoesNotExist:
-            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        if not otp:
+            return Response({"detail": "Invalid token"}, status=400)
 
-        reset_tokens.pop(token, None)
-        reset_codes.pop(email, None)
+        user = User.objects.filter(email=otp.email).first()
+        if not user:
+            return Response({"detail": "User not found"}, status=404)
 
-        return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
+        user.set_password(new_password)
+        user.save()
+
+        # cleanup
+        otp.token = None
+        otp.save()
+
+        return Response({"detail": "Password changed"})
 
 
 class SavePushSubscriptionView(APIView):

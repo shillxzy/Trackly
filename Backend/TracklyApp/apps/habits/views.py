@@ -47,15 +47,17 @@ class BaseUserModelViewSet(ModelViewSet):
 
 
 class HabitsView(BaseUserModelViewSet):
-    queryset = Habit.objects.all()
+    queryset = Habit.objects.all().select_related("user")
     serializer_class = HabitSerializer
 
+
 class HabitScheduleView(BaseUserModelViewSet):
-    queryset = HabitSchedule.objects.all()
+    queryset = HabitSchedule.objects.all().select_related("habit", "habit__user")
     serializer_class = HabitScheduleSerializer
 
+
 class HabitCompletionView(BaseUserModelViewSet):
-    queryset = HabitCompletion.objects.all()
+    queryset = HabitCompletion.objects.all().select_related("habit", "habit__user")
     serializer_class = HabitCompletionSerializer
 
     def get_queryset(self):

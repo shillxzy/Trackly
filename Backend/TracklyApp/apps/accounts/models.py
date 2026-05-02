@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class Profile(models.Model):
@@ -27,3 +28,19 @@ class PushSubscription(models.Model):
     )
     subscription = models.JSONField()
 
+
+class EmailOTP(models.Model):
+    PURPOSE_CHOICES = (
+        ("login", "login"),
+        ("register", "register"),
+        ("reset", "reset"),
+    )
+
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        return (not self.used) and timezone.now() < self.expires_at

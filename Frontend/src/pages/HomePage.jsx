@@ -53,10 +53,13 @@ export default function HomePage({ setIsAuth }) {
         return;
       }
 
-      const profile = await getProfile();
-      const habitsData = await getHabits();
-      const schedulesData = await getHabitSchedules();
-      const completionsData = await getHabitCompletions();
+      const [profile, habitsData, schedulesData, completionsData] =
+  await Promise.all([
+    getProfile(),
+    getHabits(),
+    getHabitSchedules(),
+    getHabitCompletions(),
+  ]);
 
       const habitsWithSchedules = habitsData.map((habit) => {
         const schedule = schedulesData.find((s) => s.habit === habit.id);
