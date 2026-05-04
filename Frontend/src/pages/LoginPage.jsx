@@ -23,10 +23,6 @@ const handleSubmit = async (e) => {
 
   try {
     const data = await loginUser(form, remember);
-
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
-
     setIsAuth(true);
 
     navigate("/");

@@ -26,17 +26,6 @@ export async function registerUser(data) {
     method: "POST",
     body: JSON.stringify(data),
   });
-
-  const tokenRes = await request("/token/", {
-    method: "POST",
-    body: JSON.stringify({
-      username: data.username,
-      password: data.password,
-    }),
-  });
-
-  localStorage.setItem("access_token", tokenRes.access);
-  localStorage.setItem("refresh_token", tokenRes.refresh);
-
+  
   return res; 
 }

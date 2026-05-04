@@ -11,3 +11,6 @@ export const updateProfile = (data) =>
 export const patchProfile = (data) =>
   request("/accounts/me/profile/", { method: "PATCH", body: data });
 
+// DELETE /api/accounts/me/
+export const deleteAccount = () =>
+  request("/accounts/me/", { method: "DELETE" });

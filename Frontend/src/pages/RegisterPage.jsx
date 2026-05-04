@@ -39,22 +39,54 @@ const handleVerify = async (e) => {
   setError(null);
 
   try {
-    await fetch(`${process.env.REACT_APP_API_URL}/accounts/register/verify/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        code,
-      }),
-    });
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/accounts/register/verify/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          code,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.detail || "Verification failed");
+    }
 
     alert("Акаунт підтверджено!");
     navigate("/login");
 
   } catch (err) {
-    setError("Невірний код або він протермінований");
+    setError(err.message);
   }
 };
+
+const handleResend = async () => {
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/accounts/register/resend/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data?.detail || "Failed to resend");
+
+    alert("Code resent!");
+  } catch (err) {
+    setError(err.message);
+  }
+};
+
+
 
   return (
   <div className="login-container">
@@ -160,7 +192,7 @@ const handleVerify = async (e) => {
             Didn’t receive code?{" "}
             <span
               style={{ cursor: "pointer", color: "#4f46e5" }}
-              onClick={() => handleSubmit({ preventDefault: () => {} })}
+              onClick={handleResend}
             >
               Resend
             </span>

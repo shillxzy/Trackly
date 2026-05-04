@@ -36,7 +36,7 @@ class RegisterView(APIView):
             send_mail(
                 subject="Your verification code",
                 message=f"Code: {code}",
-                from_email=settings.EMAIL_HOST_USER,
+                from_email="Trackly <dmskalsk@gmail.com>",
                 recipient_list=[user.email],
             )
         except Exception as e:
@@ -49,22 +49,38 @@ class RegisterVerifyView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        email = request.data["email"]
-        code = request.data["code"]
+        email = request.data.get("email")
+        code = request.data.get("code")
+
+        if not email or not code:
+            return Response({"detail": "Email and code required"}, status=400)
 
         otp = EmailOTP.objects.filter(
             email=email,
             purpose="register",
             used=False
-        ).order_by("-id").first()
+        ).last()
 
-        if not otp or not otp.is_valid():
-            return Response({"detail": "Invalid or expired code"}, status=400)
+        if not otp:
+            return Response({"detail": "Invalid code"}, status=400)
+
+        if otp.is_valid() is False:
+            return Response({"detail": "Code expired"}, status=400)
 
         if otp.code != code:
+            otp.attempts += 1
+            otp.save()
+
+            if otp.attempts >= 5:
+                otp.used = True
+                otp.save()
+
             return Response({"detail": "Wrong code"}, status=400)
 
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"detail": "User not found"}, status=404)
+
         user.is_active = True
         user.save()
 
@@ -72,6 +88,31 @@ class RegisterVerifyView(APIView):
         otp.save()
 
         return Response({"detail": "Account verified"})
+
+class RegisterResendCodeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"detail": "User not found"}, status=404)
+
+        if user.is_active:
+            return Response({"detail": "User already verified"}, status=400)
+
+        code = generate_otp(email, "register")
+
+        send_mail(
+            subject="Your verification code",
+            message=f"Code: {code}",
+            from_email="Trackly <dmskalsk@gmail.com>",
+            recipient_list=[email],
+        )
+
+        return Response({"detail": "Code resent"})
+
 
 
 class MeProfileView(generics.RetrieveUpdateAPIView):
@@ -101,9 +142,10 @@ class LoginView(APIView):
         password = request.data.get("password", "")
 
         user = authenticate(request, username=identifier, password=password)
-        if not user:
+
+        if not user or not user.is_active:
             return Response(
-                {"detail": "No active account found with the given credentials"},
+                {"detail": "Account not verified or invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
@@ -113,7 +155,8 @@ class LoginView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "username": user.username
-        }, status=status.HTTP_200_OK)
+        })
+
 
 class LoginRequestCodeView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -130,7 +173,7 @@ class LoginRequestCodeView(APIView):
         send_mail(
             subject="Login code",
             message=f"Your login code: {code}",
-            from_email=settings.EMAIL_HOST_USER,
+            from_email="Trackly <dmskalsk@gmail.com>",
             recipient_list=[email],
         )
 
@@ -141,22 +184,35 @@ class LoginVerifyView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        email = request.data["email"]
-        code = request.data["code"]
+        email = request.data.get("email")
+        code = request.data.get("code")
 
         otp = EmailOTP.objects.filter(
             email=email,
             purpose="login",
             used=False
-        ).order_by("-id").first()
+        ).last()
 
-        if not otp or not otp.is_valid():
-            return Response({"detail": "Invalid or expired code"}, status=400)
+        if not otp:
+            return Response({"detail": "Code not found"}, status=400)
+
+        if not otp.is_valid():
+            return Response({"detail": "Code expired"}, status=400)
 
         if otp.code != code:
+            otp.attempts += 1
+            otp.save()
+
+            if otp.attempts >= 5:
+                otp.used = True
+                otp.save()
+
             return Response({"detail": "Wrong code"}, status=400)
 
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
+
+        if not user or not user.is_active:
+            return Response({"detail": "User not active"}, status=400)
 
         refresh = RefreshToken.for_user(user)
 
@@ -167,7 +223,6 @@ class LoginVerifyView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh)
         })
-
 
 class PasswordResetRequestView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -184,7 +239,7 @@ class PasswordResetRequestView(APIView):
         send_mail(
             subject="Password reset code",
             message=f"Code: {code}",
-            from_email=settings.EMAIL_HOST_USER,
+            from_email="Trackly <dmskalsk@gmail.com>",
             recipient_list=[email],
         )
 
@@ -195,46 +250,57 @@ class PasswordResetVerifyView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        email = request.data["email"]
-        code = request.data["code"]
+        email = request.data.get("email")
+        code = request.data.get("code")
 
         otp = EmailOTP.objects.filter(
             email=email,
             purpose="reset",
             used=False
-        ).order_by("-id").first()
+        ).last()
 
-        if not otp or not otp.is_valid():
-            return Response({"detail": "Invalid OTP"}, status=400)
+        if not otp:
+            return Response({"detail": "Code not found"}, status=400)
+
+        if not otp.is_valid():
+            return Response({"detail": "Code expired"}, status=400)
 
         if otp.code != code:
+            otp.attempts += 1
+            otp.save()
+
+            if otp.attempts >= 5:
+                otp.used = True
+                otp.save()
+
             return Response({"detail": "Wrong code"}, status=400)
 
         token = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
-        # 🔥 ВАЖЛИВО: ЗБЕРІГАЄМО TOKEN
         otp.token = token
         otp.used = True
         otp.save()
 
         return Response({"token": token})
 
-
 class PasswordResetConfirmView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        token = request.data["token"]
-        new_password = request.data["new_password"]
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
 
         otp = EmailOTP.objects.filter(
             token=token,
             purpose="reset",
             used=True
-        ).first()
+        ).last()
 
         if not otp:
             return Response({"detail": "Invalid token"}, status=400)
+
+        if not otp.is_valid():
+            return Response({"detail": "Token expired"}, status=400)
 
         user = User.objects.filter(email=otp.email).first()
         if not user:
@@ -243,11 +309,11 @@ class PasswordResetConfirmView(APIView):
         user.set_password(new_password)
         user.save()
 
-        # cleanup
         otp.token = None
         otp.save()
 
         return Response({"detail": "Password changed"})
+
 
 
 class SavePushSubscriptionView(APIView):
@@ -286,3 +352,18 @@ class SendPushView(APIView):
 
         return Response({"status": "sent"})
 
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        # (опціонально) чистимо пов'язані дані
+        PushSubscription.objects.filter(user=user).delete()
+        Profile.objects.filter(user=user).delete()
+
+        user.delete()
+
+        return Response({"detail": "Account deleted"}, status=status.HTTP_204_NO_CONTENT)
