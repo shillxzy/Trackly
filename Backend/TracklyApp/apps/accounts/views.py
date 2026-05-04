@@ -32,12 +32,15 @@ class RegisterView(APIView):
 
         code = generate_otp(user.email, "register")
 
-        send_mail(
-            subject="Your verification code",
-            message=f"Code: {code}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email],
-        )
+        try:
+            send_mail(
+                subject="Your verification code",
+                message=f"Code: {code}",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+            )
+        except Exception as e:
+            print("EMAIL ERROR:", e)
 
         return Response({"detail": "Verification code sent"})
 
