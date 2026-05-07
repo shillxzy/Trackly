@@ -1,10 +1,20 @@
 from rest_framework import serializers
 from .models import Habit, HabitCompletion, HabitSchedule, FocusSession
 
+
+class HabitScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HabitSchedule
+        fields = ("id", "habit", "day_of_week")
+
+
 class HabitSerializer(serializers.ModelSerializer):
+    # FIX: повертаємо schedules разом з habit — фронт отримує schedule вже в об'єкті habit
+    schedules = HabitScheduleSerializer(many=True, read_only=True)
+
     class Meta:
         model = Habit
-        fields = ("id", "name", "description", "is_active", "created_at")
+        fields = ("id", "name", "description", "is_active", "created_at", "schedules")
 
 
 class HabitCompletionSerializer(serializers.ModelSerializer):
@@ -27,16 +37,12 @@ class HabitCompletionSerializer(serializers.ModelSerializer):
         return attrs
 
 
-
-class HabitScheduleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HabitSchedule
-        fields = ("id", "habit", "day_of_week")
-
-
 class FocusSessionSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = FocusSession
-        fields = ("id", "user", "started_at", "ended_at", "planned_duration_minutes", "actual_duration_minutes", "status",)
-
+        fields = (
+            "id", "user", "started_at", "ended_at",
+            "planned_duration_minutes", "actual_duration_minutes", "status",
+        )

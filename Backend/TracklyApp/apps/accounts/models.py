@@ -13,12 +13,12 @@ class Profile(models.Model):
     fullname = models.CharField(max_length=255, blank=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     theme = models.CharField(max_length=16, choices=THEME_CHOICES, default="dark")
-
     timezone = models.CharField(max_length=64, default="Europe/Kyiv")
     streak_days = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Profile of {self.user.username}"
+
 
 class PushSubscription(models.Model):
     user = models.OneToOneField(
@@ -41,6 +41,9 @@ class EmailOTP(models.Model):
     purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
     expires_at = models.DateTimeField()
     used = models.BooleanField(default=False)
+    # FIX: поля які використовуються у views але були відсутні в моделі
+    attempts = models.PositiveSmallIntegerField(default=0)
+    token = models.CharField(max_length=64, blank=True, null=True)
 
     def is_valid(self):
         return (not self.used) and timezone.now() < self.expires_at

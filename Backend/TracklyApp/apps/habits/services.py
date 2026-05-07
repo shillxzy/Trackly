@@ -1,35 +1,62 @@
+"""
+Backend/TracklyApp/apps/habits/services.py
+"""
+
 import datetime
 import json
+import logging
+
 from django.core.mail import send_mail
 from django.conf import settings
-from pywebpush import webpush
 
 from django.contrib.auth import get_user_model
 from .models import Habit, HabitSchedule, HabitCompletion
 from TracklyApp.apps.accounts.models import PushSubscription
 
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
-def check_habits_and_notify():
-    today = datetime.date.today()
-    weekday = today.weekday()
+# Bitmask: Python weekday() → 0=Пн, 1=Вт, ..., 6=Нд
+# Наш bitmask:              Пн=1, Вт=2, Ср=4, Чт=8, Пт=16, Сб=32, Нд=64
+WEEKDAY_TO_MASK = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64}
 
-    users = User.objects.all()
+
+def check_habits_and_notify():
+    """
+    Головна функція — викликається щодня о 19:00 Київ.
+    Знаходить користувачів які не виконали сьогоднішні звички і надсилає email.
+    """
+    import pytz
+
+    kyiv_tz = pytz.timezone("Europe/Kyiv")
+    today = datetime.datetime.now(kyiv_tz).date()
+    weekday = today.weekday()
+    today_mask = WEEKDAY_TO_MASK[weekday]
+
+    logger.info(f"[check_habits] Running for {today}, weekday={weekday}, mask={today_mask}")
+
+    users = User.objects.filter(is_active=True)
+    total_sent = 0
 
     for user in users:
-        habits = Habit.objects.filter(user=user, is_active=True)
+        habits = Habit.objects.filter(
+            user=user,
+            is_active=True
+        ).prefetch_related("schedules")
 
         missed_habits = []
 
         for habit in habits:
-            scheduled_today = HabitSchedule.objects.filter(
-                habit=habit,
-                day_of_week=weekday
-            ).exists()
-
-            if not scheduled_today:
+            schedule = habit.schedules.first()
+            if not schedule:
                 continue
 
+            # Перевіряємо чи ця звичка запланована на сьогодні
+            if not (schedule.day_of_week & today_mask):
+                continue
+
+            # Перевіряємо чи вже виконана
             done = HabitCompletion.objects.filter(
                 habit=habit,
                 completed_at=today
@@ -39,42 +66,47 @@ def check_habits_and_notify():
                 missed_habits.append(habit.name)
 
         if not missed_habits:
+            logger.info(f"[check_habits] User {user.email} — all habits done, skipping")
             continue
 
-        # 🔥 PUSH
-        send_push(user, missed_habits)
-
-        # 🔥 EMAIL
-        send_email(user, missed_habits)
-
-
-
-
-def send_push(user, habits):
-    try:
-        sub = PushSubscription.objects.get(user=user)
-
-        webpush(
-            subscription_info=sub.subscription,
-            data=json.dumps({
-                "title": "Ти пропустив звички",
-                "body": f"Невиконано: {', '.join(habits)}"
-            }),
-            vapid_private_key=settings.VAPID_PRIVATE_KEY,
-            vapid_claims={"sub": "mailto:admin@trackly.local"}
+        logger.info(
+            f"[check_habits] User {user.email} missed {len(missed_habits)} habits: {missed_habits}"
         )
-    except PushSubscription.DoesNotExist:
-        pass
+
+        send_email_notification(user, missed_habits)
+        total_sent += 1
+
+    logger.info(f"[check_habits] Done. Emails sent to {total_sent} users.")
 
 
-def send_email(user, habits):
+def send_email_notification(user, missed_habits: list[str]):
+    """
+    Надсилає email користувачу зі списком невиконаних звичок.
+    """
     if not user.email:
+        logger.warning(f"[check_habits] User {user.username} has no email, skipping")
         return
 
-    send_mail(
-        subject="Ти забув звички",
-        message=f"Невиконані звички: {', '.join(habits)}",
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[user.email],
+    habits_list = "\n".join(f"  • {h}" for h in missed_habits)
+
+    subject = "⏰ Trackly — ти ще не виконав звички сьогодні"
+
+    message = (
+        f"Привіт, {user.username}!\n\n"
+        f"Сьогодні до 19:00 ти не відмітив наступні звички як виконані:\n\n"
+        f"{habits_list}\n\n"
+        f"Ще є час — зайди в Trackly і виконай їх!\n\n"
+        f"— Команда Trackly"
     )
 
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        logger.info(f"[check_habits] Email sent to {user.email}")
+    except Exception as e:
+        logger.error(f"[check_habits] Failed to send email to {user.email}: {e}")

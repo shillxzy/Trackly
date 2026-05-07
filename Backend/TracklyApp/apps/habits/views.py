@@ -21,22 +21,14 @@ class BaseUserModelViewSet(ModelViewSet):
 
         if model_name == "HabitSchedule":
             habit = serializer.validated_data.get("habit")
-
             if habit.user != self.request.user:
-                raise PermissionError(
-                    "Cannot create schedule for another user's habit"
-                )
-
+                raise PermissionError("Cannot create schedule for another user's habit")
             serializer.save()
 
         elif model_name == "HabitCompletion":
             habit = serializer.validated_data.get("habit")
-
             if habit.user != self.request.user:
-                raise PermissionError(
-                    "Cannot complete another user's habit"
-                )
-
+                raise PermissionError("Cannot complete another user's habit")
             serializer.save()
 
         else:
@@ -47,7 +39,8 @@ class BaseUserModelViewSet(ModelViewSet):
 
 
 class HabitsView(BaseUserModelViewSet):
-    queryset = Habit.objects.all().select_related("user")
+    # FIX: prefetch_related("schedules") — тепер HabitSerializer повертає schedules в кожному habit
+    queryset = Habit.objects.all().select_related("user").prefetch_related("schedules")
     serializer_class = HabitSerializer
 
 
@@ -63,17 +56,11 @@ class HabitCompletionView(BaseUserModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = self.queryset
-
         if user.is_superuser:
             return queryset.all()
-
         return queryset.filter(habit__user=user)
 
 
 class FocusSessionView(BaseUserModelViewSet):
     queryset = FocusSession.objects.all()
     serializer_class = FocusSessionSerializer
-
-    def create(self, request, *args, **kwargs):
-        print("Incoming payload:", request.data)
-        return super().create(request, *args, **kwargs)

@@ -108,7 +108,7 @@ EMAIL_PORT = config("SMTP_PORT", default=587, cast=int)
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("SMTP_USER")
 EMAIL_HOST_PASSWORD = config("SMTP_PASS")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = "Trackly <dmskalsk@gmail.com>"
 
 VAPID_PRIVATE_KEY = config("VAPID_PRIVATE_KEY")
 VAPID_PUBLIC_KEY = config("VAPID_PUBLIC_KEY")
@@ -155,3 +155,26 @@ REST_USE_JWT = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "TracklyApp.apps.habits": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

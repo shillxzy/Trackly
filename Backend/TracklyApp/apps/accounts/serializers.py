@@ -22,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', required=False)
+    username = serializers.CharField(source="user.username", required=False)
     email = serializers.EmailField(source="user.email", required=False)
     fullname = serializers.CharField(required=False)
     avatar = serializers.ImageField(required=False)
@@ -41,8 +41,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return None
 
     def update(self, instance, validated_data):
-
-        user_data = validated_data.pop('user', {})
+        user_data = validated_data.pop("user", {})
         for attr, value in user_data.items():
             setattr(instance.user, attr, value)
         instance.user.save()
@@ -60,6 +59,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_current_password(self, value):
         user = self.context["request"].user
         if not user.check_password(value):
+            # FIX: виправлено кодування — було зламане
             raise serializers.ValidationError("Неправильний поточний пароль")
         return value
 
@@ -73,9 +73,11 @@ class ChangePasswordSerializer(serializers.Serializer):
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
+
 class PasswordResetVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
+
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     token = serializers.CharField()

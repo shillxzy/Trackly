@@ -14,7 +14,9 @@ class Habit(models.Model):
 
 class HabitSchedule(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
+    # FIX: додано related_name="schedules" — тепер habit.schedules.all() працює
+    habit = models.ForeignKey(Habit, on_delete=models.CASCADE, related_name="schedules")
+    # day_of_week зберігає bitmask: Пн=1, Вт=2, Ср=4, Чт=8, Пт=16, Сб=32, Нд=64
     day_of_week = models.SmallIntegerField()
 
 
