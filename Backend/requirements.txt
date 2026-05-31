@@ -1,57 +1,64 @@
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.12.1
-asgiref==3.11.1
-attrs==25.4.0
-certifi==2026.2.25
-cffi==2.0.0
-charset-normalizer==3.4.4
-click==8.3.1
-colorama==0.4.6
-cryptography==46.0.5
-dj-rest-auth==7.1.1
+# ── Core Django ──────────────────────────────────────────────
 Django==6.0.2
-django-allauth==65.14.3
-django-cors-headers==4.9.0
-django-email-users==2.1.0
-django-redis==6.0.0
-django-stubs==5.2.9
-django-stubs-ext==5.2.9
 djangorestframework==3.16.1
-djangorestframework-stubs==3.16.8
 djangorestframework_simplejwt==5.5.1
+asgiref==3.11.1
+sqlparse==0.5.5
+
+# ── Auth & Social ─────────────────────────────────────────────
+django-allauth==65.14.3
+dj-rest-auth==7.1.1
+
+# ── API & Schema ──────────────────────────────────────────────
 drf-spectacular==0.29.0
-fastapi==0.133.1
-h11==0.16.0
-idna==3.11
+uritemplate==4.2.0
 inflection==0.5.1
+PyYAML==6.0.3
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
-pillow==12.1.1
-psycopg==3.3.2
-psycopg-binary==3.3.2
+referencing==0.37.0
+rpds-py==0.30.0
+attrs==25.4.0
+
+# ── Database ──────────────────────────────────────────────────
 psycopg2-binary==2.9.11
-pycparser==3.0
-pydantic==2.12.5
-pydantic_core==2.41.5
-PyJWT==2.11.0
+
+# ── Static files (Render не роздає статику без whitenoise) ────
+whitenoise==6.8.2
+
+# ── CORS ──────────────────────────────────────────────────────
+django-cors-headers==4.9.0
+
+# ── Images ────────────────────────────────────────────────────
+pillow==12.1.1
+
+# ── Config ────────────────────────────────────────────────────
 python-decouple==3.8
 python-dotenv==1.2.1
-PyYAML==6.0.3
-redis==7.2.1
-referencing==0.37.0
+
+# ── JWT ───────────────────────────────────────────────────────
+PyJWT==2.11.0
+
+# ── Email / Push ──────────────────────────────────────────────
+pywebpush==1.14.0
+cryptography==46.0.5
+cffi==2.0.0
+pycparser==3.0
+
+# ── Scheduler (cron о 19:00) ──────────────────────────────────
+apscheduler==3.10.4
+pytz==2025.2
+
+# ── Web server ────────────────────────────────────────────────
+gunicorn==23.0.0
+
+# ── Utils ─────────────────────────────────────────────────────
 requests==2.32.5
-rpds-py==0.30.0
-signals==0.0.2
-sqlparse==0.5.5
-starlette==0.52.1
-types-PyYAML==6.0.12.20250915
-typing-inspection==0.4.2
+certifi==2026.2.25
+charset-normalizer==3.4.4
+idna==3.11
+urllib3==2.6.3
 typing_extensions==4.15.0
 tzdata==2025.3
-uritemplate==4.2.0
-urllib3==2.6.3
-uvicorn==0.41.0
-pywebpush==1.14.0
-apscheduler==3.10.4
-gunicorn
+annotated-types==0.7.0
+anyio==4.12.1

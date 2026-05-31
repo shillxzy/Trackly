@@ -6,7 +6,8 @@ import "../styles/SettingsPage.css";
 import Avatar from "../components/Avatar";
 import HomeLogo from "../assets/HomeLogo.png";
 import ExitButton from "../components/ExitButton";
-import { getProfile, deleteAccount } from "../services/users"; // 👈 ДОДАЛИ
+import { getProfile, deleteAccount } from "../services/users";
+import { request } from "../services/auth";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
 import habits_icon from "../assets/habits_icon.png";
@@ -20,72 +21,79 @@ export default function SettingsPage({ setIsAuth }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  const [settings, setSettings] = useState({
-    language: "English",
-    darkMode: false,
-    habitReminders: false,
-    weeklyProgress: false,
-    focusAlerts: false,
+  // Зміна пароля
+  const [passwordData, setPasswordData] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
   });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError]     = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
-    loadData();
+    const cached = localStorage.getItem("profile");
+    if (cached) { setUser(JSON.parse(cached)); return; }
+    getProfile().then(p => {
+      setUser(p);
+      localStorage.setItem("profile", JSON.stringify(p));
+    }).catch(console.error);
   }, []);
 
-  const loadData = async () => {
-    try {
-      const cachedProfile = localStorage.getItem("profile");
-
-      if (cachedProfile) {
-        setUser(JSON.parse(cachedProfile));
-        return;
-      }
-
-      const profile = await getProfile();
-      setUser(profile);
-
-      localStorage.setItem("profile", JSON.stringify(profile));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("profile");
-    localStorage.removeItem("habits");
-    localStorage.removeItem("completions");
-
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("refresh_token");
-
+    localStorage.clear();
+    sessionStorage.clear();
     setIsAuth(false);
     navigate("/login");
   };
 
-  // 🔥 НОВЕ: видалення акаунта
   const handleDeleteAccount = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to permanently delete your account?"
-    );
-
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure you want to permanently delete your account?")) return;
     try {
       await deleteAccount();
-
-      // чистимо все
       localStorage.clear();
       sessionStorage.clear();
-
       setIsAuth(false);
-
-      alert("Account deleted");
-
       navigate("/login");
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (!passwordData.current_password || !passwordData.new_password) {
+      setPasswordError("Please fill in all fields.");
+      return;
+    }
+
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      setPasswordError("New password and confirmation do not match.");
+      return;
+    }
+
+    if (passwordData.new_password.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await request("/accounts/change-password/", {
+        method: "POST",
+        body: JSON.stringify({
+          current_password: passwordData.current_password,
+          new_password:     passwordData.new_password,
+        }),
+      });
+      setPasswordSuccess("Password changed successfully!");
+      setPasswordData({ current_password: "", new_password: "", confirm_password: "" });
+    } catch (err) {
+      setPasswordError(err.message || "Something went wrong.");
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -96,34 +104,26 @@ export default function SettingsPage({ setIsAuth }) {
           <div className="logo-container">
             <img src={HomeLogo} alt="Trackly Logo" className="logo-img" />
           </div>
-
           <hr className="sidebar-divider" />
-
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" />
-              Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
             </button>
             <button className="nav-item" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" />
-              Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> Habits
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" />
-              Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" />
-              Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
             </button>
           </nav>
         </div>
-
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" />
-            Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> Log out
           </button>
         </div>
       </aside>
@@ -136,18 +136,15 @@ export default function SettingsPage({ setIsAuth }) {
               src={user?.avatar}
               username={user?.username || "User"}
               className="profile-icon"
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={() => setMenuOpen(o => !o)}
             />
-
             {menuOpen && (
               <div className="profile-menu">
                 <button onClick={() => navigate("/profile")}>Profile</button>
                 <hr className="menu-divider" />
                 <button onClick={() => navigate("/settings")}>Settings</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>
-                  Log out
-                </button>
+                <button className="logout-item" onClick={handleLogout}>Log out</button>
               </div>
             )}
           </div>
@@ -156,21 +153,17 @@ export default function SettingsPage({ setIsAuth }) {
         <ExitButton />
 
         <div className="settings-container">
+
+          {/* ── Account Settings ── */}
           <div className="settings-card">
-            <h2>Accounts Settings</h2>
+            <h2>Account Settings</h2>
 
             <div className="settings-row">
               <div>
                 <h3>Language</h3>
-                <p>Select your display language:</p>
+                <p>Select your display language</p>
               </div>
-              <select
-                className="language-select"
-                value={settings.language}
-                onChange={(e) =>
-                  setSettings({ ...settings, language: e.target.value })
-                }
-              >
+              <select className="language-select">
                 <option>English</option>
                 <option>Українська</option>
               </select>
@@ -180,27 +173,8 @@ export default function SettingsPage({ setIsAuth }) {
 
             <div className="settings-row">
               <div>
-                <h3>Dark Mode</h3>
-                <p>Enable dark mode for low light conditions:</p>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={settings.darkMode}
-                  onChange={() =>
-                    setSettings({ ...settings, darkMode: !settings.darkMode })
-                  }
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-divider" />
-
-            <div className="settings-row">
-              <div>
                 <h3>Delete Account</h3>
-                <p>Permanently delete your account and all associated data:</p>
+                <p>Permanently delete your account and all associated data</p>
               </div>
               <button className="delete-btn" onClick={handleDeleteAccount}>
                 Delete Account
@@ -208,7 +182,56 @@ export default function SettingsPage({ setIsAuth }) {
             </div>
           </div>
 
-          {/* інше без змін */}
+          {/* ── Change Password ── */}
+          <div className="settings-card">
+            <h2>Change Password</h2>
+
+            <div className="password-field">
+              <label>Current Password</label>
+              <input
+                type="password"
+                value={passwordData.current_password}
+                onChange={e => setPasswordData(p => ({ ...p, current_password: e.target.value }))}
+                placeholder="Enter current password"
+              />
+            </div>
+
+            <div className="settings-divider" />
+
+            <div className="password-field">
+              <label>New Password</label>
+              <input
+                type="password"
+                value={passwordData.new_password}
+                onChange={e => setPasswordData(p => ({ ...p, new_password: e.target.value }))}
+                placeholder="At least 8 characters"
+              />
+            </div>
+
+            <div className="password-field">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                value={passwordData.confirm_password}
+                onChange={e => setPasswordData(p => ({ ...p, confirm_password: e.target.value }))}
+                placeholder="Repeat new password"
+              />
+            </div>
+
+            {passwordError   && <p className="settings-error">{passwordError}</p>}
+            {passwordSuccess && <p className="settings-success">{passwordSuccess}</p>}
+
+            <div>
+              <button
+                className="settings-save-btn"
+                onClick={handleChangePassword}
+                disabled={passwordLoading}
+              >
+                {passwordLoading ? "Saving..." : "Change Password"}
+              </button>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
