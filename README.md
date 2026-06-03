@@ -64,8 +64,7 @@ Trackly is a Habit & Focus Tracker web application with a REST API backend (Djan
 - ✅Habit completion tracking
 - ✅Focus sessions tracking
 - ✅Analytics endpoints
-- ⬜Dockerize backend + frontend
-- ⬜Deploy to cloud (Heroku / Railway / Render)
+- ✅Deploy to cloud (Heroku / Railway / Render)
 - ⬜Enhance frontend UI with charts and filters
 - ⬜AI assistant integration
 
