@@ -5,6 +5,7 @@ import { getProfile, patchProfile } from "../services/users";
 import Avatar from "../components/Avatar";
 import HomeLogo from "../assets/HomeLogo.png";
 import ExitButton from "../components/ExitButton";
+import { useT } from "../translations/LanguageContext";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
 import habits_icon from "../assets/habits_icon.png";
@@ -14,6 +15,7 @@ import logout_icon from "../assets/logout_icon.png";
 
 export default function ProfilePage({ setIsAuth }) {
   const navigate = useNavigate();
+  const t = useT();
 
   const [user, setUser]     = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -75,10 +77,10 @@ export default function ProfilePage({ setIsAuth }) {
       const updated = await patchProfile(data);
       setUser(updated);
       localStorage.setItem("profile", JSON.stringify(updated));
-      setSaveMsg("Profile updated successfully!");
+      setSaveMsg(t("profile.savedSuccess"));
     } catch (err) {
       console.error(err);
-      setSaveMsg("Failed to save changes.");
+      setSaveMsg(t("profile.savedError"));
     } finally {
       setSaving(false);
     }
@@ -94,30 +96,30 @@ export default function ProfilePage({ setIsAuth }) {
           <hr className="sidebar-divider" />
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> {t("nav.dashboard")}
             </button>
             <button className="nav-item" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" /> Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> {t("nav.habits")}
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> {t("nav.focusSession")}
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> {t("nav.analytics")}
             </button>
           </nav>
         </div>
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" /> Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> {t("nav.logout")}
           </button>
         </div>
       </aside>
 
       <main className="main">
         <div className="topbar">
-          <h1>Profile</h1>
+          <h1>{t("profile.title")}</h1>
           <div className="profile-wrapper">
             <Avatar
               src={user?.avatar}
@@ -127,11 +129,11 @@ export default function ProfilePage({ setIsAuth }) {
             />
             {menuOpen && (
               <div className="profile-menu">
-                <button onClick={() => navigate("/profile")}>Profile</button>
+                <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                 <hr className="menu-divider" />
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>Log out</button>
+                <button className="logout-item" onClick={handleLogout}>{t("profile_menu.logout")}</button>
               </div>
             )}
           </div>
@@ -141,7 +143,6 @@ export default function ProfilePage({ setIsAuth }) {
 
         <div className="profile-content-container">
 
-          {/* ── Profile card ── */}
           <div className="profile-card">
             <div className="avatar-section">
               <Avatar
@@ -160,13 +161,13 @@ export default function ProfilePage({ setIsAuth }) {
                 className="upload-photo-btn"
                 onClick={() => document.getElementById("avatar-upload").click()}
               >
-                Upload Photo
+                {t("profile.uploadPhoto")}
               </button>
             </div>
 
             <div className="info-section">
               <div>
-                <label>Username</label>
+                <label>{t("profile.username")}</label>
                 <input
                   className="profile-input"
                   value={formData.username}
@@ -174,7 +175,7 @@ export default function ProfilePage({ setIsAuth }) {
                 />
               </div>
               <div>
-                <label>Full Name</label>
+                <label>{t("profile.fullName")}</label>
                 <input
                   className="profile-input"
                   value={formData.fullname}
@@ -182,7 +183,7 @@ export default function ProfilePage({ setIsAuth }) {
                 />
               </div>
               <div>
-                <label>Email</label>
+                <label>{t("profile.email")}</label>
                 <input
                   className="profile-input"
                   value={formData.email}
@@ -190,7 +191,6 @@ export default function ProfilePage({ setIsAuth }) {
                 />
               </div>
 
-              {/* ── Streak info ── */}
               <div style={{
                 marginTop: "8px",
                 padding: "12px 16px",
@@ -204,21 +204,20 @@ export default function ProfilePage({ setIsAuth }) {
                 <span style={{ fontSize: "24px" }}>🔥</span>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "18px" }}>
-                    {user?.streak_days || 0} Day Streak
+                    {user?.streak_days || 0} {t("profile.streakBadge")}
                   </div>
                   <div style={{ fontSize: "12px", opacity: 0.7 }}>
-                    Keep completing your daily habits!
+                    {t("profile.streakHint")}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Save ── */}
           {saveMsg && (
             <p style={{
               textAlign: "center",
-              color: saveMsg.includes("success") ? "#2e7d32" : "#c62828",
+              color: saveMsg.includes("success") || saveMsg.includes("оновлено") ? "#2e7d32" : "#c62828",
               margin: 0,
             }}>
               {saveMsg}
@@ -231,7 +230,7 @@ export default function ProfilePage({ setIsAuth }) {
               onClick={handleProfileSave}
               disabled={saving}
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? t("profile.saving") : t("profile.saveChanges")}
             </button>
           </div>
 

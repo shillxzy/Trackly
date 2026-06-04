@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getHabitCompletions } from "../../services/habitCompletions";
+import { useT } from "../../translations/LanguageContext";
 
 export default function WeeklyProgressChart() {
+  const t = useT();
   const [data, setData] = useState([]);
+
   useEffect(() => {
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  
-  async function fetchData() {
-    const completions = await getHabitCompletions();
-    const weekData = days.map((day) => ({ day, completed: 0 }));
-
-    completions.forEach((c) => {
-      const date = new Date(c.completed_at);
-      const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
-      weekData[dayIndex].completed += 1;
-    });
-
-    setData(weekData);
-  }
-
-  fetchData();
-}, []); 
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    async function fetchData() {
+      const completions = await getHabitCompletions();
+      const weekData = days.map((day) => ({ day, completed: 0 }));
+      completions.forEach((c) => {
+        const date = new Date(c.completed_at);
+        const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+        weekData[dayIndex].completed += 1;
+      });
+      setData(weekData);
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="chart-card">
-      <h3>Weekly Progress</h3>
+      <h3>{t("charts.weeklyProgress")}</h3>
       <div style={{ width: "100%", height: 220 }}>
         <ResponsiveContainer>
           <BarChart data={data}>
@@ -35,7 +34,7 @@ export default function WeeklyProgressChart() {
                 <stop offset="100%" stopColor="#FFD079" />
               </linearGradient>
             </defs>
-            <XAxis dataKey="day" />
+            <XAxis dataKey="day" tickFormatter={(day) => t(`charts.days.${day}`)} />
             <YAxis />
             <Tooltip />
             <Bar dataKey="completed" fill="url(#weeklyGradient)" radius={[6, 6, 0, 0]} />

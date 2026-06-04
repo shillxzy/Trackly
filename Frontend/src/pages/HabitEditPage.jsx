@@ -18,22 +18,24 @@ import focussession_icon from "../assets/focussession_icon.png";
 import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
 import Loading from "../components/Loading";
-
-const DAY_LABELS = [
-  { label: "Mon", value: 1 },
-  { label: "Tue", value: 2 },
-  { label: "Wed", value: 3 },
-  { label: "Thu", value: 4 },
-  { label: "Fri", value: 5 },
-  { label: "Sat", value: 6 },
-  { label: "Sun", value: 0 },
-];
+import { useT } from "../translations/LanguageContext";
 
 const DAY_MAP = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16, 6: 32, 0: 64 };
 
 export default function HabitEditPage({ setIsAuth }) {
   const navigate = useNavigate();
   const { id } = useParams();
+  const t = useT();
+
+  const DAY_LABELS = [
+    { label: t("charts.days.Mon"), value: 1 },
+    { label: t("charts.days.Tue"), value: 2 },
+    { label: t("charts.days.Wed"), value: 3 },
+    { label: t("charts.days.Thu"), value: 4 },
+    { label: t("charts.days.Fri"), value: 5 },
+    { label: t("charts.days.Sat"), value: 6 },
+    { label: t("charts.days.Sun"), value: 0 },
+  ];
 
   const [habit, setHabit] = useState(null);
   const [user, setUser] = useState(null);
@@ -48,7 +50,6 @@ export default function HabitEditPage({ setIsAuth }) {
   const loadData = useCallback(async () => {
     try {
       const profile = await getProfile();
-      // FIX: getHabits тепер повертає schedules всередині habit
       const habits = await getHabits();
       const foundHabit = habits.find((h) => String(h.id) === id);
 
@@ -60,16 +61,13 @@ export default function HabitEditPage({ setIsAuth }) {
       setName(foundHabit.name || "");
       setDescription(foundHabit.description || "");
 
-      // FIX: читаємо з foundHabit.schedules (масив), а не foundHabit.schedule
       if (foundHabit.schedules && foundHabit.schedules.length > 0) {
         const mask = Number(foundHabit.schedules[0].day_of_week || 0);
-
         const days = new Set(
           DAY_LABELS
             .filter((day) => (mask & DAY_MAP[day.value]) !== 0)
             .map((day) => day.value)
         );
-
         setSelectedDays(days);
       }
     } catch (e) {
@@ -108,13 +106,13 @@ export default function HabitEditPage({ setIsAuth }) {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError("Habit name is required");
+      setError(t("habitEdit.errorName"));
       return;
     }
 
     const mask = buildMask();
     if (mask === 0) {
-      setError("Select at least one day");
+      setError(t("habitEdit.errorDays"));
       return;
     }
 
@@ -124,7 +122,6 @@ export default function HabitEditPage({ setIsAuth }) {
 
       await updateHabit(habit.id, { name, description });
 
-      // FIX: використовуємо habit.schedules (масив) замість habit.schedule
       if (habit.schedules && habit.schedules.length > 0) {
         await updateHabitSchedule(habit.schedules[0].id, { day_of_week: mask });
       } else {
@@ -134,7 +131,7 @@ export default function HabitEditPage({ setIsAuth }) {
       navigate("/habits");
     } catch (e) {
       console.error(e);
-      setError("Failed to update habit");
+      setError(t("habitEdit.errorFailed"));
     } finally {
       setLoading(false);
     }
@@ -160,23 +157,23 @@ export default function HabitEditPage({ setIsAuth }) {
           <hr className="sidebar-divider" />
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> {t("nav.dashboard")}
             </button>
             <button className="nav-item active" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" /> Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> {t("nav.habits")}
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> {t("nav.focusSession")}
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> {t("nav.analytics")}
             </button>
           </nav>
         </div>
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" /> Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> {t("nav.logout")}
           </button>
         </div>
       </aside>
@@ -184,8 +181,8 @@ export default function HabitEditPage({ setIsAuth }) {
       <main className="main">
         <div className="topbar">
           <div>
-            <h1>Edit Habit</h1>
-            <p>Update your habit details</p>
+            <h1>{t("habitEdit.title")}</h1>
+            <p>{t("habitEdit.subtitle")}</p>
           </div>
           <div className="profile-wrapper">
             <Avatar
@@ -196,11 +193,11 @@ export default function HabitEditPage({ setIsAuth }) {
             />
             {menuOpen && (
               <div className="profile-menu">
-                <button onClick={() => navigate("/profile")}>Profile</button>
+                <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                 <hr className="menu-divider" />
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>Log out</button>
+                <button className="logout-item" onClick={handleLogout}>{t("profile_menu.logout")}</button>
               </div>
             )}
           </div>
@@ -210,7 +207,7 @@ export default function HabitEditPage({ setIsAuth }) {
 
         <div className="habit-edit-card">
           <div className="form-group">
-            <label>Habit name</label>
+            <label>{t("habitEdit.habitName")}</label>
             <input
               type="text"
               value={name}
@@ -219,7 +216,7 @@ export default function HabitEditPage({ setIsAuth }) {
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label>{t("habitEdit.description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -227,7 +224,7 @@ export default function HabitEditPage({ setIsAuth }) {
           </div>
 
           <div className="form-group">
-            <label>Days of the week</label>
+            <label>{t("habitEdit.daysOfWeek")}</label>
             <div className="days-checkboxes">
               {DAY_LABELS.map((day) => (
                 <label key={day.value} className="day-checkbox">
@@ -246,10 +243,10 @@ export default function HabitEditPage({ setIsAuth }) {
 
           <div className="form-actions">
             <button className="cancel-btn" onClick={() => navigate("/habits")}>
-              Cancel
+              {t("habitEdit.cancel")}
             </button>
             <button className="save-btn" onClick={handleSave} disabled={loading}>
-              {loading ? "Saving..." : "Save changes"}
+              {loading ? t("habitEdit.saving") : t("habitEdit.saveChanges")}
             </button>
           </div>
         </div>

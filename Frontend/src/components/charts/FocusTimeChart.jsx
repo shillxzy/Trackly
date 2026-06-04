@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getFocusSessions } from "../../services/focusSessions";
+import { useT } from "../../translations/LanguageContext";
 
 export default function FocusTimeChart() {
+  const t = useT();
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     async function fetchData() {
       const sessions = await getFocusSessions();
-
       const weekData = days.map((day) => ({ day, minutes: 0 }));
-
       sessions.forEach((s) => {
         if (s.status !== "active") {
           const date = new Date(s.started_at);
@@ -19,16 +19,14 @@ export default function FocusTimeChart() {
           weekData[dayIndex].minutes += s.actual_duration_minutes;
         }
       });
-
       setData(weekData);
     }
-
     fetchData();
   }, []);
 
   return (
     <div className="chart-card">
-      <h3>Focus Time</h3>
+      <h3>{t("charts.focusTime")}</h3>
       <div style={{ width: "100%", height: 220 }}>
         <ResponsiveContainer>
           <AreaChart data={data}>
@@ -38,8 +36,7 @@ export default function FocusTimeChart() {
                 <stop offset="100%" stopColor="#3864AF" stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="day" />
-            {/* Фіксована вісь Y від 0 до 25 */}
+            <XAxis dataKey="day" tickFormatter={(day) => t(`charts.days.${day}`)} />
             <YAxis domain={[0, 25]} />
             <Tooltip />
             <Area

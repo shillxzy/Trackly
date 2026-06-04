@@ -8,7 +8,6 @@ import { getProfile } from "../services/users";
 import { getHabits } from "../services/habits";
 import { getHabitCompletions } from "../services/habitCompletions";
 
-
 import HomeLogo from "../assets/HomeLogo.png";
 import Avatar from "../components/Avatar";
 
@@ -19,17 +18,18 @@ import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
 
 import HabitsCompletedChart from "../components/charts/HabitsCompletedChart";
-import WeeklyProgressChart from "../components/charts/WeeklyProgressChart"; 
+import WeeklyProgressChart from "../components/charts/WeeklyProgressChart";
 import FocusTimeChart from "../components/charts/FocusTimeChart";
+import { useT } from "../translations/LanguageContext";
 
 export default function AnalyticsPage({ setIsAuth })
 {
   const navigate = useNavigate();
+  const t = useT();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [habits, setHabits] = useState([]);
   const [completions, setCompletions] = useState([]);
-
 
   useEffect(() => {
     loadData();
@@ -37,7 +37,6 @@ export default function AnalyticsPage({ setIsAuth })
 
   const loadData = async () => {
   try {
-
     const cachedProfile = localStorage.getItem("profile");
     const cachedHabits = localStorage.getItem("habits");
     const cachedCompletions = localStorage.getItem("completions");
@@ -46,7 +45,7 @@ export default function AnalyticsPage({ setIsAuth })
       setUser(JSON.parse(cachedProfile));
       setHabits(JSON.parse(cachedHabits));
       setCompletions(JSON.parse(cachedCompletions));
-      return; 
+      return;
     }
 
     const profile = await getProfile();
@@ -73,11 +72,9 @@ export default function AnalyticsPage({ setIsAuth })
   localStorage.removeItem("completions");
   sessionStorage.removeItem("access_token");
   sessionStorage.removeItem("refresh_token");
-  setIsAuth(false); 
+  setIsAuth(false);
   navigate("/login");
 };
-
-
 
   return (
     <div className="home-container">
@@ -90,19 +87,19 @@ export default function AnalyticsPage({ setIsAuth })
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
               <img src={dashboard_icon} alt="" className="nav-icon" />
-              Dashboard
+              {t("nav.dashboard")}
             </button>
             <button className="nav-item" onClick={() => navigate("/habits")}>
               <img src={habits_icon} alt="" className="nav-icon" />
-              Habits
+              {t("nav.habits")}
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
               <img src={focussession_icon} alt="" className="nav-icon" />
-              Focus Session
+              {t("nav.focusSession")}
             </button>
             <button className="nav-item active" onClick={() => navigate("/analytics")}>
               <img src={analytics_icon} alt="" className="nav-icon" />
-              Analytics
+              {t("nav.analytics")}
             </button>
           </nav>
         </div>
@@ -111,7 +108,7 @@ export default function AnalyticsPage({ setIsAuth })
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
             <img src={logout_icon} alt="" className="nav-icon" />
-            Log out
+            {t("nav.logout")}
           </button>
         </div>
       </aside>
@@ -119,10 +116,10 @@ export default function AnalyticsPage({ setIsAuth })
       <main className="main">
               <div className="topbar">
                 <div>
-                  <h1>Analytics</h1>
-                  <p>See your habit progress and focus time.</p>
+                  <h1>{t("analytics.title")}</h1>
+                  <p>{t("analytics.subtitle")}</p>
                 </div>
-      
+
                 <div className="profile-wrapper">
                   <Avatar
                     src={user?.avatar}
@@ -130,14 +127,14 @@ export default function AnalyticsPage({ setIsAuth })
                     className="profile-icon"
                     onClick={() => setMenuOpen(!menuOpen)}
                   />
-      
+
                   {menuOpen && (
                     <div className="profile-menu">
-                      <button onClick={() => navigate("/profile")}>Profile</button>
+                      <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                       <hr className="menu-divider" />
-                      <button onClick={() => navigate("/settings")}>Settings</button>
+                      <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                       <hr className="menu-divider" />
-                      <button className="logout-item" onClick={handleLogout}>Log out</button>
+                      <button className="logout-item" onClick={handleLogout}>{t("profile_menu.logout")}</button>
                     </div>
                   )}
                 </div>
@@ -147,11 +144,11 @@ export default function AnalyticsPage({ setIsAuth })
               <div className="weekly-section">
                   <WeeklyProgressChart completions={completions} />
                 </div>
-              
+
                 <div className="wide">
                   <HabitsCompletedChart habits={habits} completions={completions} />
                 </div>
-              
+
                 <div className="wide">
                   <FocusTimeChart focusSessions={[]} />
                 </div>
@@ -160,6 +157,4 @@ export default function AnalyticsPage({ setIsAuth })
 
     </div>
   )
-
-
 }

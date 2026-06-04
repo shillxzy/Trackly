@@ -17,12 +17,14 @@ import habits_icon from "../assets/habits_icon.png";
 import focussession_icon from "../assets/focussession_icon.png";
 import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
+import { useT } from "../translations/LanguageContext";
 
 export default function FocusSessionHistoryPage({ setIsAuth }) {
   const navigate = useNavigate();
+  const t = useT();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [viewMode] = useState("week"); 
+  const [viewMode] = useState("week");
 
   const [historyData, setHistoryData] = useState([]);
 
@@ -31,23 +33,20 @@ const groupSessionsByDay = (sessions, viewMode) => {
   const today = new Date();
   const map = new Map();
 
-  // Стандартний ключ YYYY-MM-DD
   const formatKey = (date) => date.toISOString().split("T")[0];
 
-  // Ініціалізація днів з 0 хвилин
   for (let i = 0; i < daysCount; i++) {
     const d = new Date();
     d.setDate(today.getDate() - i);
     const key = formatKey(d);
 
     map.set(key, {
-      day: d.toLocaleDateString("en-US", { weekday: "long" }),
+      day: d.toLocaleDateString(undefined, { weekday: "long" }),
       date: key,
       minutes: 0,
     });
   }
 
-  // Групування сесій
   sessions.forEach((s) => {
     const startedAt = new Date(s.started_at || s.created_at || s.date);
     const key = formatKey(startedAt);
@@ -66,8 +65,6 @@ const groupSessionsByDay = (sessions, viewMode) => {
 
   return Array.from(map.values());
 };
-
-
 
 const generateHistoryFromApi = useCallback(async () => {
   try {
@@ -104,7 +101,6 @@ useEffect(() => {
     }
   };
 
-  
   const handleLogout = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
@@ -113,10 +109,9 @@ useEffect(() => {
   localStorage.removeItem("completions");
   sessionStorage.removeItem("access_token");
   sessionStorage.removeItem("refresh_token");
-  setIsAuth(false); 
+  setIsAuth(false);
   navigate("/login");
 };
-
 
   const totalMinutes = historyData.reduce((acc, item) => acc + item.minutes, 0);
   const averageMinutes =
@@ -134,22 +129,22 @@ useEffect(() => {
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
               <img src={dashboard_icon} alt="" className="nav-icon" />
-              Dashboard
+              {t("nav.dashboard")}
             </button>
             <button className="nav-item" onClick={() => navigate("/habits")}>
               <img src={habits_icon} alt="" className="nav-icon" />
-              Habits
+              {t("nav.habits")}
             </button>
             <button
               className="nav-item active"
               onClick={() => navigate("/focus-session")}
             >
               <img src={focussession_icon} alt="" className="nav-icon" />
-              Focus Session
+              {t("nav.focusSession")}
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
               <img src={analytics_icon} alt="" className="nav-icon" />
-              Analytics
+              {t("nav.analytics")}
             </button>
           </nav>
         </div>
@@ -158,7 +153,7 @@ useEffect(() => {
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
             <img src={logout_icon} alt="" className="nav-icon" />
-            Log out
+            {t("nav.logout")}
           </button>
         </div>
       </aside>
@@ -166,7 +161,7 @@ useEffect(() => {
       <main className="main">
         <div className="topbar">
           <div>
-            <h1>Focus History</h1>
+            <h1>{t("focusHistory.title")}</h1>
           </div>
 
           <div className="profile-wrapper">
@@ -179,11 +174,11 @@ useEffect(() => {
 
             {menuOpen && (
               <div className="profile-menu">
-                <button onClick={() => navigate("/profile")}>Profile</button>
+                <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                 <hr className="menu-divider" />
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                 <hr className="menu-divider" />
-                <button onClick={handleLogout}>Log out</button>
+                <button onClick={handleLogout}>{t("profile_menu.logout")}</button>
               </div>
             )}
           </div>
@@ -203,24 +198,23 @@ useEffect(() => {
               </div>
 
               <div className="history-time">
-                {item.minutes} min
+                {item.minutes} {t("focusHistory.min")}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Summary */}
         <div className="history-summary">
           <div className="summary-row">
             <span>
-              {viewMode === "week" ? "This Week" : "This Month"}:
+              {viewMode === "week" ? t("focusHistory.thisWeek") : t("focusHistory.thisMonth")}:
             </span>
-            <span>{totalMinutes} min</span>
+            <span>{totalMinutes} {t("focusHistory.min")}</span>
           </div>
 
           <div className="summary-row">
-            <span>Average per day:</span>
-            <span>{averageMinutes} min</span>
+            <span>{t("focusHistory.averagePerDay")}:</span>
+            <span>{averageMinutes} {t("focusHistory.min")}</span>
           </div>
 
           <div className="summary-bar">

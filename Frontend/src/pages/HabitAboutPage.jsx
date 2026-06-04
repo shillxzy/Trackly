@@ -16,37 +16,37 @@ import focussession_icon from "../assets/focussession_icon.png";
 import analytics_icon from "../assets/analytics_icon.png";
 import logout_icon from "../assets/logout_icon.png";
 import Loading from "../components/Loading";
+import { useT } from "../translations/LanguageContext";
 
-// FIX: таблиця для декодування bitmask у назви днів
-const DAY_LABELS = [
-  { label: "Mon", mask: 1 },
-  { label: "Tue", mask: 2 },
-  { label: "Wed", mask: 4 },
-  { label: "Thu", mask: 8 },
-  { label: "Fri", mask: 16 },
-  { label: "Sat", mask: 32 },
-  { label: "Sun", mask: 64 },
+const DAY_MASKS = [
+  { mask: 1,  key: "Mon" },
+  { mask: 2,  key: "Tue" },
+  { mask: 4,  key: "Wed" },
+  { mask: 8,  key: "Thu" },
+  { mask: 16, key: "Fri" },
+  { mask: 32, key: "Sat" },
+  { mask: 64, key: "Sun" },
 ];
-
-function decodeMask(mask) {
-  if (!mask && mask !== 0) return "Not set";
-  const days = DAY_LABELS.filter((d) => (mask & d.mask) !== 0).map((d) => d.label);
-  return days.length > 0 ? days.join(", ") : "Not set";
-}
 
 export default function HabitAboutPage({ setIsAuth }) {
   const navigate = useNavigate();
   const { id } = useParams();
+  const t = useT();
 
   const [habit, setHabit] = useState(null);
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const decodeMask = (mask) => {
+    if (!mask && mask !== 0) return t("habitAbout.notSet");
+    const days = DAY_MASKS.filter((d) => (mask & d.mask) !== 0).map((d) => t(`charts.days.${d.key}`));
+    return days.length > 0 ? days.join(", ") : t("habitAbout.notSet");
+  };
+
   const loadData = useCallback(async () => {
     try {
       const profile = await getProfile();
       const habits = await getHabits();
-      // FIX: habits тепер повертають schedules всередині об'єкту
       const foundHabit = habits.find((h) => String(h.id) === id);
       setUser(profile);
       setHabit(foundHabit || null);
@@ -81,7 +81,6 @@ export default function HabitAboutPage({ setIsAuth }) {
     );
   }
 
-  // FIX: отримуємо mask з schedules масиву
   const scheduleMask = habit.schedules && habit.schedules.length > 0
     ? habit.schedules[0].day_of_week
     : null;
@@ -96,23 +95,23 @@ export default function HabitAboutPage({ setIsAuth }) {
           <hr className="sidebar-divider" />
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> {t("nav.dashboard")}
             </button>
             <button className="nav-item active" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" /> Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> {t("nav.habits")}
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> {t("nav.focusSession")}
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> {t("nav.analytics")}
             </button>
           </nav>
         </div>
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" /> Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> {t("nav.logout")}
           </button>
         </div>
       </aside>
@@ -120,8 +119,8 @@ export default function HabitAboutPage({ setIsAuth }) {
       <main className="main">
         <div className="topbar">
           <div>
-            <h1>Habit Details</h1>
-            <p>Information about your habit</p>
+            <h1>{t("habitAbout.title")}</h1>
+            <p>{t("habitAbout.subtitle")}</p>
           </div>
           <div className="profile-wrapper">
             <Avatar
@@ -132,11 +131,11 @@ export default function HabitAboutPage({ setIsAuth }) {
             />
             {menuOpen && (
               <div className="profile-menu">
-                <button onClick={() => navigate("/profile")}>Profile</button>
+                <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                 <hr className="menu-divider" />
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>Log out</button>
+                <button className="logout-item" onClick={handleLogout}>{t("profile_menu.logout")}</button>
               </div>
             )}
           </div>
@@ -146,40 +145,37 @@ export default function HabitAboutPage({ setIsAuth }) {
           <h2>{habit.name}</h2>
 
           <div className="habit-about-row">
-            <span className="label">Description:</span>
-            <span className="value">{habit.description || "No description"}</span>
+            <span className="label">{t("habitAbout.description")}</span>
+            <span className="value">{habit.description || t("habitAbout.noDescription")}</span>
           </div>
 
           <div className="habit-about-row">
-            <span className="label">Status:</span>
+            <span className="label">{t("habitAbout.status")}</span>
             <span className={`value ${habit.is_active ? "active" : "inactive"}`}>
-              {habit.is_active ? "Active" : "Inactive"}
+              {habit.is_active ? t("habitAbout.active") : t("habitAbout.inactive")}
             </span>
           </div>
 
-          {/* FIX: показуємо дні тижня — раніше цього розділу взагалі не було */}
           <div className="habit-about-row">
-            <span className="label">Schedule:</span>
+            <span className="label">{t("habitAbout.schedule")}</span>
             <span className="value">
               {decodeMask(scheduleMask)}
             </span>
           </div>
 
           <div className="habit-about-row">
-            <span className="label">Created:</span>
+            <span className="label">{t("habitAbout.created")}</span>
             <span className="value">
               {habit.created_at ? new Date(habit.created_at).toLocaleDateString() : "—"}
             </span>
           </div>
 
           <div className="habit-about-actions">
-            {/* FIX: виправлено зламаний символ стрілки */}
             <button className="back-btn" onClick={() => navigate("/habits")}>
-              &#8592; Back
+              {t("habitAbout.back")}
             </button>
-            {/* FIX: виправлено шлях з /habit/edit/ на /habits/edit/ */}
             <button className="edit-btn" onClick={() => navigate(`/habits/edit/${habit.id}`)}>
-              Edit
+              {t("habitAbout.edit")}
             </button>
           </div>
         </div>

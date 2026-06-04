@@ -8,6 +8,7 @@ import HomeLogo from "../assets/HomeLogo.png";
 import ExitButton from "../components/ExitButton";
 import { getProfile, deleteAccount } from "../services/users";
 import { request } from "../services/auth";
+import { useLanguage } from "../translations/LanguageContext";
 
 import dashboard_icon from "../assets/dashboard_icon.png";
 import habits_icon from "../assets/habits_icon.png";
@@ -17,11 +18,11 @@ import logout_icon from "../assets/logout_icon.png";
 
 export default function SettingsPage({ setIsAuth }) {
   const navigate = useNavigate();
+  const { lang, setLang, t } = useLanguage();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Зміна пароля
   const [passwordData, setPasswordData] = useState({
     current_password: "",
     new_password: "",
@@ -48,7 +49,7 @@ export default function SettingsPage({ setIsAuth }) {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete your account?")) return;
+    if (!window.confirm(t("settings.deleteConfirm"))) return;
     try {
       await deleteAccount();
       localStorage.clear();
@@ -65,17 +66,17 @@ export default function SettingsPage({ setIsAuth }) {
     setPasswordSuccess("");
 
     if (!passwordData.current_password || !passwordData.new_password) {
-      setPasswordError("Please fill in all fields.");
+      setPasswordError(t("settings.errorFields"));
       return;
     }
 
     if (passwordData.new_password !== passwordData.confirm_password) {
-      setPasswordError("New password and confirmation do not match.");
+      setPasswordError(t("settings.errorMatch"));
       return;
     }
 
     if (passwordData.new_password.length < 8) {
-      setPasswordError("New password must be at least 8 characters.");
+      setPasswordError(t("settings.errorLength"));
       return;
     }
 
@@ -88,10 +89,10 @@ export default function SettingsPage({ setIsAuth }) {
           new_password:     passwordData.new_password,
         }),
       });
-      setPasswordSuccess("Password changed successfully!");
+      setPasswordSuccess(t("settings.passwordChanged"));
       setPasswordData({ current_password: "", new_password: "", confirm_password: "" });
     } catch (err) {
-      setPasswordError(err.message || "Something went wrong.");
+      setPasswordError(err.message || t("settings.errorGeneric"));
     } finally {
       setPasswordLoading(false);
     }
@@ -107,30 +108,30 @@ export default function SettingsPage({ setIsAuth }) {
           <hr className="sidebar-divider" />
           <nav className="nav-menu">
             <button className="nav-item" onClick={() => navigate("/home")}>
-              <img src={dashboard_icon} alt="" className="nav-icon" /> Dashboard
+              <img src={dashboard_icon} alt="" className="nav-icon" /> {t("nav.dashboard")}
             </button>
             <button className="nav-item" onClick={() => navigate("/habits")}>
-              <img src={habits_icon} alt="" className="nav-icon" /> Habits
+              <img src={habits_icon} alt="" className="nav-icon" /> {t("nav.habits")}
             </button>
             <button className="nav-item" onClick={() => navigate("/focus-session")}>
-              <img src={focussession_icon} alt="" className="nav-icon" /> Focus Session
+              <img src={focussession_icon} alt="" className="nav-icon" /> {t("nav.focusSession")}
             </button>
             <button className="nav-item" onClick={() => navigate("/analytics")}>
-              <img src={analytics_icon} alt="" className="nav-icon" /> Analytics
+              <img src={analytics_icon} alt="" className="nav-icon" /> {t("nav.analytics")}
             </button>
           </nav>
         </div>
         <div className="sidebar-bottom">
           <hr className="sidebar-divider" />
           <button className="logout-btn" onClick={handleLogout}>
-            <img src={logout_icon} alt="" className="nav-icon" /> Log out
+            <img src={logout_icon} alt="" className="nav-icon" /> {t("nav.logout")}
           </button>
         </div>
       </aside>
 
       <main className="main">
         <div className="topbar">
-          <h1>Settings</h1>
+          <h1>{t("settings.title")}</h1>
           <div className="profile-wrapper">
             <Avatar
               src={user?.avatar}
@@ -140,11 +141,11 @@ export default function SettingsPage({ setIsAuth }) {
             />
             {menuOpen && (
               <div className="profile-menu">
-                <button onClick={() => navigate("/profile")}>Profile</button>
+                <button onClick={() => navigate("/profile")}>{t("profile_menu.profile")}</button>
                 <hr className="menu-divider" />
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/settings")}>{t("profile_menu.settings")}</button>
                 <hr className="menu-divider" />
-                <button className="logout-item" onClick={handleLogout}>Log out</button>
+                <button className="logout-item" onClick={handleLogout}>{t("profile_menu.logout")}</button>
               </div>
             )}
           </div>
@@ -154,18 +155,21 @@ export default function SettingsPage({ setIsAuth }) {
 
         <div className="settings-container">
 
-          {/* ── Account Settings ── */}
           <div className="settings-card">
-            <h2>Account Settings</h2>
+            <h2>{t("settings.accountSettings")}</h2>
 
             <div className="settings-row">
               <div>
-                <h3>Language</h3>
-                <p>Select your display language</p>
+                <h3>{t("settings.language")}</h3>
+                <p>{t("settings.languageDesc")}</p>
               </div>
-              <select className="language-select">
-                <option>English</option>
-                <option>Українська</option>
+              <select
+                className="language-select"
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+              >
+                <option value="en">English</option>
+                <option value="uk">Українська</option>
               </select>
             </div>
 
@@ -173,48 +177,47 @@ export default function SettingsPage({ setIsAuth }) {
 
             <div className="settings-row">
               <div>
-                <h3>Delete Account</h3>
-                <p>Permanently delete your account and all associated data</p>
+                <h3>{t("settings.deleteAccount")}</h3>
+                <p>{t("settings.deleteAccountDesc")}</p>
               </div>
               <button className="delete-btn" onClick={handleDeleteAccount}>
-                Delete Account
+                {t("settings.deleteAccount")}
               </button>
             </div>
           </div>
 
-          {/* ── Change Password ── */}
           <div className="settings-card">
-            <h2>Change Password</h2>
+            <h2>{t("settings.changePassword")}</h2>
 
             <div className="password-field">
-              <label>Current Password</label>
+              <label>{t("settings.currentPassword")}</label>
               <input
                 type="password"
                 value={passwordData.current_password}
                 onChange={e => setPasswordData(p => ({ ...p, current_password: e.target.value }))}
-                placeholder="Enter current password"
+                placeholder={t("settings.currentPasswordPlaceholder")}
               />
             </div>
 
             <div className="settings-divider" />
 
             <div className="password-field">
-              <label>New Password</label>
+              <label>{t("settings.newPassword")}</label>
               <input
                 type="password"
                 value={passwordData.new_password}
                 onChange={e => setPasswordData(p => ({ ...p, new_password: e.target.value }))}
-                placeholder="At least 8 characters"
+                placeholder={t("settings.newPasswordPlaceholder")}
               />
             </div>
 
             <div className="password-field">
-              <label>Confirm New Password</label>
+              <label>{t("settings.confirmPassword")}</label>
               <input
                 type="password"
                 value={passwordData.confirm_password}
                 onChange={e => setPasswordData(p => ({ ...p, confirm_password: e.target.value }))}
-                placeholder="Repeat new password"
+                placeholder={t("settings.confirmPasswordPlaceholder")}
               />
             </div>
 
@@ -227,7 +230,7 @@ export default function SettingsPage({ setIsAuth }) {
                 onClick={handleChangePassword}
                 disabled={passwordLoading}
               >
-                {passwordLoading ? "Saving..." : "Change Password"}
+                {passwordLoading ? t("settings.changing") : t("settings.changePasswordBtn")}
               </button>
             </div>
           </div>

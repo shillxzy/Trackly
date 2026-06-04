@@ -1,23 +1,32 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { getHabits } from "../../services/habits";
-import { getHabitCompletions } from "../../services/habitCompletions";
+import { useT } from "../../translations/LanguageContext";
 
-export default function HabitsCompletedChart() {
-  const [percent, setPercent] = useState(0);
+const DAY_MASK = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16, 6: 32, 0: 64 };
 
-  useEffect(() => {
-    async function fetchData() {
-      const habits = await getHabits();
-      const completions = await getHabitCompletions();
-      const today = new Date().toISOString().slice(0, 10);
-      const completedToday = completions.filter((c) => c.completed_at === today).length;
-      const total = habits.length || 1;
-      setPercent(Math.round((completedToday / total) * 100));
-    }
+export default function HabitsCompletedChart({ habits = [], completions = [] }) {
+  const t = useT();
 
-    fetchData();
-  }, []);
+  const percent = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayMask = DAY_MASK[new Date().getDay()];
+
+    const scheduledToday = habits.filter(
+      (h) =>
+        h.schedules &&
+        h.schedules.length > 0 &&
+        (h.schedules[0].day_of_week & todayMask) !== 0
+    );
+
+    const completedToday = completions.filter(
+      (c) =>
+        c.completed_at === today &&
+        scheduledToday.some((h) => h.id === c.habit)
+    ).length;
+
+    const total = scheduledToday.length || 1;
+    return Math.round((completedToday / total) * 100);
+  }, [habits, completions]);
 
   const data = [
     { name: "Done", value: percent },
@@ -26,7 +35,7 @@ export default function HabitsCompletedChart() {
 
   return (
     <div className="chart-card">
-      <h3>Habits Completed</h3>
+      <h3>{t("charts.habitsCompleted")}</h3>
       <div style={{ width: "100%", height: 220, position: "relative" }}>
         <ResponsiveContainer>
           <PieChart>
